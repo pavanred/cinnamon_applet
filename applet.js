@@ -5,8 +5,15 @@ const Applet = imports.ui.applet;
 const Clutter = imports.gi.Clutter;
 const Gettext = imports.gettext;
 const _ = Gettext.gettext;
+const Lang = imports.lang;
 const AppletDir = imports.ui.appletManager.appletMeta['sports-update@pavanred'].path;
+const Util = imports.misc.util;
 
+const PANEL_TOOL_TIP = "Sports - Live score udpates";
+const ICON_FILE_NAME = "/icon.png";
+const REFRESH_SCORES = "Refresh Scores";
+const SETTINGS = "Settings";
+const CONF_SCRIPT = "configuration-script";
 
 function MyApplet(orientation) {
 	this._init(orientation);
@@ -20,14 +27,18 @@ MyApplet.prototype = {
 
 			try {
 				//set panel icon and tool tip
-				this.set_applet_tooltip("Sports - Live score udpates");	
+				this.set_applet_tooltip(PANEL_TOOL_TIP);	
 				this.set_applet_label("");
-				this.set_applet_icon_path(AppletDir + "/icon.png");
+				this.set_applet_icon_path(AppletDir + ICON_FILE_NAME);
 				
 				//main menu
 				this.menuManager = new PopupMenu.PopupMenuManager(this);
 				this.menu = new MyMenu(this, orientation);
 				this.menuManager.addMenu(this.menu);
+
+				//settings menu 
+                		this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
+                		this._applet_context_menu.addMenuItem(this.settingsMenu);
 
 				this._display();
 			}
@@ -35,7 +46,7 @@ MyApplet.prototype = {
 				global.logError(e);
 			};
 		},
-
+		
 		on_applet_clicked: function(event) {
 			this.menu.toggle();
 		},
@@ -52,7 +63,7 @@ MyApplet.prototype = {
 
 		//add a score item
 		_addScoreItem: function(updateText) {
-			let iconPath = AppletDir + "/icon.png";
+			let iconPath = AppletDir + ICON_FILE_NAME;
 
 			this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText));
 
@@ -63,6 +74,11 @@ MyApplet.prototype = {
 		_getScores: function(){
 			//test data
 			return ["Score update 1..","Score update 2..","Score update 3.."];
+		},
+
+		_settings: function(){
+			global.log("spawn conf script..");
+			//Util.spawn([CONF_SCRIPT]);
 		}
 };
 
