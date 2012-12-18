@@ -7,13 +7,17 @@ const Gettext = imports.gettext;
 const _ = Gettext.gettext;
 const Lang = imports.lang;
 const AppletDir = imports.ui.appletManager.appletMeta['sports-update@pavanred'].path;
+const AppletMeta = imports.ui.appletManager.applets['sports-update@pavanred'];
+const AppSettings = AppletMeta.settings.Values;
 const Util = imports.misc.util;
+const GLib = imports.gi.GLib;
 
 const PANEL_TOOL_TIP = "Sports - Live score udpates";
 const ICON_FILE_NAME = "/icon.png";
 const REFRESH_SCORES = "Refresh Scores";
 const SETTINGS = "Settings";
-const CONF_SCRIPT = "configuration-script";
+//const CONF_SCRIPT = "configuration-script";
+const conf_script = GLib.build_filenamev([global.userdatadir, 'applets/sports-update@pavanred/settings.js']);
 
 function MyApplet(orientation) {
 	this._init(orientation);
@@ -26,6 +30,12 @@ MyApplet.prototype = {
 			Applet.TextIconApplet.prototype._init.call(this, orientation);
 
 			try {
+				//get configuration from settings.js
+				this.scoreUpdatesOn = AppSettings.scoreUpdatesOn;
+				this.newsUpdatesOn = AppSettings.newsUpdatesOn;				
+				this.football_score = AppSettings.football_score;
+				this.football_news = AppSettings.football_news;
+
 				//set panel icon and tool tip
 				this.set_applet_tooltip(PANEL_TOOL_TIP);	
 				this.set_applet_label("");
@@ -37,8 +47,8 @@ MyApplet.prototype = {
 				this.menuManager.addMenu(this.menu);
 
 				//settings menu 
-                		this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
-                		this._applet_context_menu.addMenuItem(this.settingsMenu);
+                this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
+                this._applet_context_menu.addMenuItem(this.settingsMenu);
 
 				this._display();
 			}
@@ -55,9 +65,20 @@ MyApplet.prototype = {
 		_display: function() {
 
 			var scores = this._getScores();
-
+			
+			//score items
 			for (var i = 0; i < scores.length; i++) {
 				this._addScoreItem(scores[i].toString());
+			}
+
+			//separator
+			//this.menu.addMenuItem(new MyPopupMenuItem());
+
+			var news = this._getNews();
+
+			//news items
+			for (var i = 0; i < news.length; i++) {
+				this._addScoreItem(news[i].toString());
 			}
 		},
 
@@ -72,14 +93,22 @@ MyApplet.prototype = {
 		
 		//get score updates from 3rd party service
 		_getScores: function(){
+						
 			//test data
 			return ["Score update 1..","Score update 2..","Score update 3.."];
 		},
 
 		_settings: function(){
-			global.log("spawn conf script..");
+			//global.log("spawn conf script..");
 			//Util.spawn([CONF_SCRIPT]);
-		}
+			Main.Util.spawnCommandLine("xdg-open " + conf_script);
+		},
+
+		_getNews: function(){
+		
+			//test data
+			return ["News item 1","News Item 2","News Item3"];
+		}		
 };
 
 //Menu
@@ -100,13 +129,11 @@ MyMenu.prototype = {
 };
 
 //menu items - Image and text
-function MyPopupMenuItem()
-{
+function MyPopupMenuItem(){
 	this._init.apply(this, arguments);
 }
 
-MyPopupMenuItem.prototype =
-{
+MyPopupMenuItem.prototype = {
 		__proto__: PopupMenu.PopupBaseMenuItem.prototype,
 		_init: function(iconPath, text, params)
 		{
@@ -126,6 +153,16 @@ MyPopupMenuItem.prototype =
 			this.label = new St.Label({ text: text });
 			this.addActor(this.label);
 		}
+};
+
+function httpGet(theUrl)
+    {
+    var xmlHttp = null;
+
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
 };
 
 function main(metadata, orientation) {
