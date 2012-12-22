@@ -69,35 +69,66 @@ LiveScore.prototype.onHandleResponse = function(session, message) {
 }
 
 LiveScore.prototype.parseResponse = function(response){
-	
-	global.log("response");
-	global.log(response);
-	
-	var scores = [];
+
+	var sport;
 	
 	var tempStrings = response.split("&");
+	
+	var scorelist = [];
+	
+	switch (this.apiRoot){
+	case "http://sports.espn.go.com/nba/bottomline/scores":
+		sport = "basketball";
+		break;
+	case "http://sports.espn.go.com/wnba/bottomline/scores":
+		sport = "basketball";
+		break;
+	case "http://sports.espn.go.com/ncb/bottomline/scores":
+		sport = "basketball";
+		break;		
+	case "http://sports.espn.go.com/nfl/bottomline/scores":
+		sport = "americanfootball";
+		break;
+	case "http://sports.espn.go.com/mlb/bottomline/scores":
+		sport = "baseball";
+		break;
+	case "http://sports.espn.go.com/nhl/bottomline/scores":
+		sport = "icehockey";
+		break;
+	default:
+		sport = "football";
+	}
 	
 	for (var i = 0; i < tempStrings.length; i++) {
 		
 		var temp = tempStrings[i];
+		var scoreItem = undefined;
 		
-		if(temp.indexOf("_left") !== -1){
+		if(temp.indexOf("_left") !== -1 && temp.indexOf("FINAL") == -1 && temp.indexOf("CANCELLED") == -1){
 			
 			var equalPos = temp.indexOf("=");
 			
-			if(equalPos !== -1){
+			if(equalPos != -1){
 				temp = temp.substring(equalPos+1);
 				
 				temp = temp.replace("^","");
 				temp = temp.replace(/%20/g," ");
 				
-				scores[scores.length] = temp;
-				global.log(temp);
+				var startPos = temp.indexOf("(");
+				
+				if(startPos != -1){
+					var status = temp.substring(startPos);
+					
+					if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){
+						var scoreItem = {Sport: sport, Score: temp};
+						scorelist[scorelist.length] = scoreItem;
+					}	
+				}	
 			}
-		}
-	}
+		}		
+	}	
 	
-	return scores;
+	return scorelist;
 }
 
 

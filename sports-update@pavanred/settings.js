@@ -2,16 +2,13 @@
 
 const Values = {
 
-	scoreUpdatesOn: true,
-	newsUpdatesOn: true,
-
     //live score updates for sports
-	football_score: true,
+	basketball_updates: true,  //NBA - National Basketball Association (USA)
+	americanfootball_updates: true,  //NFL - National Football League (USA)
+	baseball_updates: true,  //MLB - Major League Baseball (USA)
+	icehockey_updates: true,  //NHL - National Hockey League (USA)
+	women_basketball_updates: true,  //WNBA - Women's National Basketball Association (USA)
+	NCAA_basketball: true,   //NCAA -  National Collegiate Athletic Association - Basketball (USA)
+	
 
-	//add your espn api key here 
-	//http://developer.espn.com/
-	//ESPN_api_key:"",  
-
-	//news updates for sports
-	football_news:true
 };

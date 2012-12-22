@@ -18,13 +18,25 @@ const LiveScore = imports.liveScore;
 
 const UUID = 'sports-update@pavanred';
 const PANEL_TOOL_TIP = "Sports - Live score udpates";
-const ICON_FILE_NAME = "/icon.png";
+
+const FOOTBALL_ICON = "/icon-football.png";
+const BASKETBALL_ICON = "/icon-basketball.png";
+const AFOOTBALL_ICON = "/icon-americanfootball.png";
+const BASEBALL_ICON = "/icon-baseball.png";
+const ICEHOCKEY_ICON = "/icon-icehockey.png";
+
 const REFRESH_SCORES = "Refresh Scores";
+
 const SETTINGS = "Settings";
-//const CONF_SCRIPT = "configuration-script";
+
 const conf_script = GLib.build_filenamev([global.userdatadir, 'applets/sports-update@pavanred/settings.js']);
 
-const NBA_APIROOT =  "http://sports.espn.go.com/nba/bottomline/scores";
+const NBA_APIROOT = "http://sports.espn.go.com/nba/bottomline/scores";
+const NFL_APIROOT = "http://sports.espn.go.com/nfl/bottomline/scores";
+const MLB_APIROOT = "http://sports.espn.go.com/mlb/bottomline/scores";
+const NHL_APIROOT = "http://sports.espn.go.com/nhl/bottomline/scores";
+const WNBA_APIROOT = "http://sports.espn.go.com/wnba/bottomline/scores";
+const NCAA_APIROOT = "http://sports.espn.go.com/ncb/bottomline/scores";
 
 function MyApplet(orientation) {
 	this._init(orientation);
@@ -36,18 +48,27 @@ MyApplet.prototype = {
 		_init: function(orientation) {
 			Applet.TextIconApplet.prototype._init.call(this, orientation);
 
-			try {
-				//get configuration from settings.js
-				this.scoreUpdatesOn = AppSettings.scoreUpdatesOn;
-				this.newsUpdatesOn = AppSettings.newsUpdatesOn;				
-				this.football_score = AppSettings.football_score;
-				this.football_news = AppSettings.football_news;
-				this.ESPN_API_KEY = AppSettings.ESPN_api_key;
+			var sports = [];
 
+			try {
+				//get configuration from settings.js				
+				if(AppSettings.basketball_updates)
+					sports[sports.length] = NBA_APIROOT;
+				if(AppSettings.americanfootball_updates)
+					sports[sports.length] = NFL_APIROOT;	
+				if(AppSettings.baseball_updates)
+					sports[sports.length] = MLB_APIROOT;	
+				if(AppSettings.icehockey_updates)		
+					sports[sports.length] = NHL_APIROOT;
+				if(AppSettings.women_basketball_updates)
+					sports[sports.length] = WNBA_APIROOT;	
+				if(AppSettings.NCAA_basketball)		
+					sports[sports.length] = NCAA_APIROOT;
+	
 				//set panel icon and tool tip
 				this.set_applet_tooltip(PANEL_TOOL_TIP);	
 				this.set_applet_label("");
-				this.set_applet_icon_path(AppletDir + ICON_FILE_NAME);
+				this.set_applet_icon_path(AppletDir + FOOTBALL_ICON);
 				
 				//main menu
 				this.menuManager = new PopupMenu.PopupMenuManager(this);
@@ -59,7 +80,7 @@ MyApplet.prototype = {
                 this._applet_context_menu.addMenuItem(this.settingsMenu);
 				
 				log("getting scores");	
-				this._getScores();
+				this._getScores(sports);
 			}
 			catch (e) {
 				global.logError(e);
@@ -69,51 +90,39 @@ MyApplet.prototype = {
 		on_applet_clicked: function(event) {
 			this.menu.toggle();
 		},
-		
-		//show main menu
-		_display: function() {
-
-			var scores = this._getScores();
-			
-			//score items
-			for (var i = 0; i < scores.length; i++) {
-				this._addScoreItem(scores[i].toString());
-			}
-		},
 
 		//add a score item
-		_addScoreItem: function(updateText) {
-			let iconPath = AppletDir + ICON_FILE_NAME;
+		_addScoreItem: function(updateText, icon) {
+			let iconPath = AppletDir + icon;
 
 			this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText));
 
 			this.menu.addMenuItem(this.scoreItem);
 		},
 		
-		//get score updates for NBA
-		_getScores: function(){
+		//get score updates for all sports
+		_getScores: function(sports){
 			
 			let _this = this;
+			
+			for (var i = 0; i < sports.length; i++) {
 				
-			this.ls = new LiveScore.LiveScore({
-				'apiRoot': NBA_APIROOT,
-				'callbacks':{
-					'onError':function(status_code){_this._onLiveScoreError(status_code)},
-					'onScoreUpdate':function(jsonData){_this._onScoreUpdate(jsonData);}
+					this.ls = new LiveScore.LiveScore({
+					'apiRoot': sports[i],
+					'callbacks':{
+						'onError':function(status_code){_this._onLiveScoreError(status_code)},
+						'onScoreUpdate':function(jsonData){_this._onScoreUpdate(jsonData);}
+					}
+				});
+				
+				if(!this.ls.initialised()){
+					this._onSetupError(); 
+					return;
 				}
-			});
-			
-			if(!this.ls.initialised()){
-				this._onSetupError(); 
-				return;
-			}
-			
-			log("loading scores");		
-			this.ls.loadScores();
-					
-			//log("loading test data here");		
-			//test data
-			//return ["Score update 1..","Score update 2..","Score update 3.."];
+				
+				log("loading scores");		
+				this.ls.loadScores();	
+			}			
 		},	
 		
 		_settings: function(){
@@ -123,24 +132,42 @@ MyApplet.prototype = {
 		_onSetupError: function() {
 			this.set_applet_tooltip(_("Unable to refresh scores"));				
 			log("Unable to refresh scores");	
-			this.scoreItem = new MyPopupMenuItem(AppletDir + ICON_FILE_NAME, "sports-update@pavanred : Error. Unable to refresh scores");
+			this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "sports-update@pavanred : Error. Unable to refresh scores");
 			this.menu.addMenuItem(this.scoreItem);
 		},	
 			
 		_onLiveScoreError: function() {
-			log("status code: " + status_code);
-			//global.log("sports-update@pavanred : status code: " + status_code);
+			log("status code: " + status_code);			
 			this.onSetupError();
 		},	
 			
-		_onScoreUpdate: function(jsonData) {
-			//TODO: loop through json data and return scores array
-			log("onScoreUpdate.jsonData");
-			var scores = jsonData;
+		_onScoreUpdate: function(scorelist) {
 			
+			log("onScoreUpdate.jsonData");
+						
 			//score items
-			for (var i = 0; i < scores.length; i++) {
-				this._addScoreItem(scores[i].toString());
+			for (var i = 0; i < scorelist.length; i++) {
+				
+				var sportIcon;
+				
+				switch (scorelist[i].Sport){
+				case "basketball":
+					sportIcon = BASKETBALL_ICON;
+					break;
+				case "americanfootball":
+					sportIcon = AFOOTBALL_ICON;
+					break;
+				case "baseball":
+					sportIcon = BASEBALL_ICON;
+					break;
+				case "icehockey":
+					sportIcon = ICEHOCKEY_ICON;
+					break;
+				default:
+					sportIcon = FOOTBALL_ICON;
+				}
+				
+				this._addScoreItem(scorelist[i].Score, sportIcon);
 			}	
 		}		
 };
