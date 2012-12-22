@@ -1,3 +1,5 @@
+imports.searchPath.push( imports.ui.appletManager.appletMeta["sports-update@pavanred"].path );
+
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
@@ -12,12 +14,17 @@ const AppSettings = AppletMeta.settings.Values;
 const Util = imports.misc.util;
 const GLib = imports.gi.GLib;
 
+const LiveScore = imports.liveScore;
+
+const UUID = 'sports-update@pavanred';
 const PANEL_TOOL_TIP = "Sports - Live score udpates";
 const ICON_FILE_NAME = "/icon.png";
 const REFRESH_SCORES = "Refresh Scores";
 const SETTINGS = "Settings";
 //const CONF_SCRIPT = "configuration-script";
 const conf_script = GLib.build_filenamev([global.userdatadir, 'applets/sports-update@pavanred/settings.js']);
+
+const NBA_APIROOT =  "http://sports.espn.go.com/nba/bottomline/scores";
 
 function MyApplet(orientation) {
 	this._init(orientation);
@@ -35,6 +42,7 @@ MyApplet.prototype = {
 				this.newsUpdatesOn = AppSettings.newsUpdatesOn;				
 				this.football_score = AppSettings.football_score;
 				this.football_news = AppSettings.football_news;
+				this.ESPN_API_KEY = AppSettings.ESPN_api_key;
 
 				//set panel icon and tool tip
 				this.set_applet_tooltip(PANEL_TOOL_TIP);	
@@ -49,8 +57,9 @@ MyApplet.prototype = {
 				//settings menu 
                 this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
                 this._applet_context_menu.addMenuItem(this.settingsMenu);
-
-				this._display();
+				
+				log("getting scores");	
+				this._getScores();
 			}
 			catch (e) {
 				global.logError(e);
@@ -70,16 +79,6 @@ MyApplet.prototype = {
 			for (var i = 0; i < scores.length; i++) {
 				this._addScoreItem(scores[i].toString());
 			}
-
-			//separator
-			//this.menu.addMenuItem(new MyPopupMenuItem());
-
-			var news = this._getNews();
-
-			//news items
-			for (var i = 0; i < news.length; i++) {
-				this._addScoreItem(news[i].toString());
-			}
 		},
 
 		//add a score item
@@ -91,23 +90,58 @@ MyApplet.prototype = {
 			this.menu.addMenuItem(this.scoreItem);
 		},
 		
-		//get score updates from 3rd party service
+		//get score updates for NBA
 		_getScores: function(){
-						
+			
+			let _this = this;
+				
+			this.ls = new LiveScore.LiveScore({
+				'apiRoot': NBA_APIROOT,
+				'callbacks':{
+					'onError':function(status_code){_this._onLiveScoreError(status_code)},
+					'onScoreUpdate':function(jsonData){_this._onScoreUpdate(jsonData);}
+				}
+			});
+			
+			if(!this.ls.initialised()){
+				this._onSetupError(); 
+				return;
+			}
+			
+			log("loading scores");		
+			this.ls.loadScores();
+					
+			//log("loading test data here");		
 			//test data
-			return ["Score update 1..","Score update 2..","Score update 3.."];
-		},
-
-		_settings: function(){
-			//global.log("spawn conf script..");
-			//Util.spawn([CONF_SCRIPT]);
-			Main.Util.spawnCommandLine("xdg-open " + conf_script);
-		},
-
-		_getNews: function(){
+			//return ["Score update 1..","Score update 2..","Score update 3.."];
+		},	
 		
-			//test data
-			return ["News item 1","News Item 2","News Item3"];
+		_settings: function(){
+			Main.Util.spawnCommandLine("xdg-open " + conf_script);
+		}, 
+		
+		_onSetupError: function() {
+			this.set_applet_tooltip(_("Unable to refresh scores"));				
+			log("Unable to refresh scores");	
+			this.scoreItem = new MyPopupMenuItem(AppletDir + ICON_FILE_NAME, "sports-update@pavanred : Error. Unable to refresh scores");
+			this.menu.addMenuItem(this.scoreItem);
+		},	
+			
+		_onLiveScoreError: function() {
+			log("status code: " + status_code);
+			//global.log("sports-update@pavanred : status code: " + status_code);
+			this.onSetupError();
+		},	
+			
+		_onScoreUpdate: function(jsonData) {
+			//TODO: loop through json data and return scores array
+			log("onScoreUpdate.jsonData");
+			var scores = jsonData;
+			
+			//score items
+			for (var i = 0; i < scores.length; i++) {
+				this._addScoreItem(scores[i].toString());
+			}	
 		}		
 };
 
@@ -155,17 +189,13 @@ MyPopupMenuItem.prototype = {
 		}
 };
 
-function httpGet(theUrl)
-    {
-    var xmlHttp = null;
-
-    xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false );
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
-};
-
 function main(metadata, orientation) {
 	let myApplet = new MyApplet(orientation);
 	return myApplet;
 };
+		//Util.spawnCommandLine("notify-send --icon=mail-read \""+a_title+"\" \""+a_message+"\"");	
+
+//logging
+function log(message) {
+	global.log(UUID + "::" + log.caller.name + ": " + message);
+}
