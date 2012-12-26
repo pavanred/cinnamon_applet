@@ -11,7 +11,7 @@ function LiveScore(a_params){
 
 	if (a_params != undefined){
 		
-		global.log("Setting apiRoot = " + a_params.apiRoot);		
+		//global.log("Setting apiRoot = " + a_params.apiRoot);		
 		this.apiRoot = a_params.apiRoot;
 		
 		if (a_params.callbacks!=undefined){
@@ -37,7 +37,7 @@ LiveScore.prototype.initialised = function(){
 
 LiveScore.prototype.loadScores = function(){
 	var url = this.apiRoot;
-	global.log("sports-update@pavanred :: liveScore.js :loading scores");
+	//global.log("sports-update@pavanred :: liveScore.js :loading scores");
 	let this_ = this;
 	let message = Soup.Message.new('GET', url);	
 	this.httpSession.queue_message(message, function(session,message){this_.onHandleResponse(session,message)});	
@@ -45,17 +45,17 @@ LiveScore.prototype.loadScores = function(){
 
 LiveScore.prototype.onHandleResponse = function(session, message) {
 	
-	global.log("sports-update@pavanred :: response handler:" + message.status_code);
+	//global.log("sports-update@pavanred :: response handler:" + message.status_code);
 	
 	if (message.status_code !== 200) {
-		global.log("sports-update@pavanred : Error status code of: " + message.status_code);
+		//global.log("sports-update@pavanred : Error status code of: " + message.status_code);
 		this.callbacks.onError(message.status_code);
 		return;
 	}
 	
 	var response = this.parseResponse(message.response_body.data);
 	
-	global.log("sports-update@pavanred :: response handler:" + response);
+	//global.log("sports-update@pavanred :: response handler:" + response);
 	
 	try {
 		if (this.callbacks.onScoreUpdate != undefined){			
@@ -105,7 +105,7 @@ LiveScore.prototype.parseResponse = function(response){
 		var scoreItem = undefined;
 		
 		if(temp.indexOf("_left") !== -1 && temp.indexOf("FINAL") == -1 && temp.indexOf("CANCELLED") == -1){
-			
+					
 			var equalPos = temp.indexOf("=");
 			
 			if(equalPos != -1){

@@ -13,19 +13,18 @@ const AppletMeta = imports.ui.appletManager.applets['sports-update@pavanred'];
 const AppSettings = AppletMeta.settings.Values;
 const Util = imports.misc.util;
 const GLib = imports.gi.GLib;
+const Mainloop = imports.mainloop;
 
 const LiveScore = imports.liveScore;
 
 const UUID = 'sports-update@pavanred';
-const PANEL_TOOL_TIP = "Sports - Live score udpates";
+const PANEL_TOOL_TIP = "Live score udpates";
 
 const FOOTBALL_ICON = "/icon-football.png";
 const BASKETBALL_ICON = "/icon-basketball.png";
 const AFOOTBALL_ICON = "/icon-americanfootball.png";
 const BASEBALL_ICON = "/icon-baseball.png";
 const ICEHOCKEY_ICON = "/icon-icehockey.png";
-
-const REFRESH_SCORES = "Refresh Scores";
 
 const SETTINGS = "Settings";
 
@@ -79,8 +78,14 @@ MyApplet.prototype = {
                 this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
                 this._applet_context_menu.addMenuItem(this.settingsMenu);
 				
-				log("getting scores");	
-				this._getScores(sports);
+				this._scoreTimer(sports, orientation);
+				
+				//this._getScores(sports, orientation);
+				
+				/*Mainloop.timeout_add_seconds((AppSettings.refresh_interval), Lang.bind(this, function() {
+					log("getting scores" + new Date().getTime().toString());	
+					this._getScores(sports, orientation);
+				}));*/
 			}
 			catch (e) {
 				global.logError(e);
@@ -101,9 +106,11 @@ MyApplet.prototype = {
 		},
 		
 		//get score updates for all sports
-		_getScores: function(sports){
-			
+		_getScores: function(sports, orientation){
+			log("get scores");
 			let _this = this;
+			
+			//this.menu = new MyMenu(this, orientation);
 			
 			for (var i = 0; i < sports.length; i++) {
 				
@@ -120,7 +127,7 @@ MyApplet.prototype = {
 					return;
 				}
 				
-				log("loading scores");		
+				//log("loading scores");		
 				this.ls.loadScores();	
 			}			
 		},	
@@ -131,19 +138,17 @@ MyApplet.prototype = {
 		
 		_onSetupError: function() {
 			this.set_applet_tooltip(_("Unable to refresh scores"));				
-			log("Unable to refresh scores");	
+			//log("Unable to refresh scores");	
 			this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "sports-update@pavanred : Error. Unable to refresh scores");
 			this.menu.addMenuItem(this.scoreItem);
 		},	
 			
 		_onLiveScoreError: function() {
-			log("status code: " + status_code);			
+			//log("status code: " + status_code);			
 			this.onSetupError();
 		},	
 			
 		_onScoreUpdate: function(scorelist) {
-			
-			log("onScoreUpdate.jsonData");
 						
 			//score items
 			for (var i = 0; i < scorelist.length; i++) {
@@ -169,7 +174,25 @@ MyApplet.prototype = {
 				
 				this._addScoreItem(scorelist[i].Score, sportIcon);
 			}	
-		}		
+		},
+		
+		_scoreTimer: function(sports, orientation) {
+			log("in score timer");
+			this._getScores(sports, orientation);
+			this._onUpdateScoreTimer(AppSettings.refresh_interval * 60 * 1000);
+
+		},
+	
+		_onUpdateScoreTimer: function(timeout) {
+			log("on update score timer");
+			if (this.scoreTimerId) {
+				Mainloop.source_remove(this.scoreTimerId);
+				this.scoreTimerId = 0;
+			}
+			if (timeout > 0){
+				this.scoreTimerId = Mainloop.timeout_add(timeout,Lang.bind(this, this._scoreTimer));
+			}
+		}	
 };
 
 //Menu
@@ -220,7 +243,6 @@ function main(metadata, orientation) {
 	let myApplet = new MyApplet(orientation);
 	return myApplet;
 };
-		//Util.spawnCommandLine("notify-send --icon=mail-read \""+a_title+"\" \""+a_message+"\"");	
 
 //logging
 function log(message) {
