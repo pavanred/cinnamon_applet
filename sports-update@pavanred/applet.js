@@ -78,14 +78,15 @@ MyApplet.prototype = {
                 this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
                 this._applet_context_menu.addMenuItem(this.settingsMenu);
 				
-				this._scoreTimer(sports, orientation);
-				
+				//this._scoreTimer(sports, orientation);
 				//this._getScores(sports, orientation);
 				
-				/*Mainloop.timeout_add_seconds((AppSettings.refresh_interval), Lang.bind(this, function() {
-					log("getting scores" + new Date().getTime().toString());	
-					this._getScores(sports, orientation);
-				}));*/
+				this.sports = sports;
+				this.orientation = orientation;
+				
+				Mainloop.timeout_add_seconds(AppSettings.refresh_interval, Lang.bind(this, function() {
+					this._getScores();
+				}));
 			}
 			catch (e) {
 				global.logError(e);
@@ -106,11 +107,14 @@ MyApplet.prototype = {
 		},
 		
 		//get score updates for all sports
-		_getScores: function(sports, orientation){
+		_getScores: function(){
 			log("get scores");
 			let _this = this;
 			
-			//this.menu = new MyMenu(this, orientation);
+			let sports = this.sports;
+			let orientation = this.orientation;
+			
+			this.menu = new MyMenu(this, orientation);
 			
 			for (var i = 0; i < sports.length; i++) {
 				
@@ -154,7 +158,7 @@ MyApplet.prototype = {
 			for (var i = 0; i < scorelist.length; i++) {
 				
 				var sportIcon;
-				
+								
 				switch (scorelist[i].Sport){
 				case "basketball":
 					sportIcon = BASKETBALL_ICON;
@@ -173,26 +177,12 @@ MyApplet.prototype = {
 				}
 				
 				this._addScoreItem(scorelist[i].Score, sportIcon);
-			}	
-		},
-		
-		_scoreTimer: function(sports, orientation) {
-			log("in score timer");
-			this._getScores(sports, orientation);
-			this._onUpdateScoreTimer(AppSettings.refresh_interval * 60 * 1000);
-
-		},
-	
-		_onUpdateScoreTimer: function(timeout) {
-			log("on update score timer");
-			if (this.scoreTimerId) {
-				Mainloop.source_remove(this.scoreTimerId);
-				this.scoreTimerId = 0;
 			}
-			if (timeout > 0){
-				this.scoreTimerId = Mainloop.timeout_add(timeout,Lang.bind(this, this._scoreTimer));
-			}
-		}	
+			
+			Mainloop.timeout_add_seconds(AppSettings.refresh_interval, Lang.bind(this, function() {
+				this._getScores();
+			}));
+		}
 };
 
 //Menu

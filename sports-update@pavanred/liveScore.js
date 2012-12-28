@@ -127,7 +127,7 @@ LiveScore.prototype.parseResponse = function(response){
 			}
 		}		
 	}	
-	
+
 	return scorelist;
 }
 
