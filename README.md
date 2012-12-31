@@ -30,3 +30,6 @@ This script was tested on Cinnamon 1.6.7 on Linux Mint 14 (Nadia)
 * Add short details for score updates. For e.g. Top scorers.
 * Provide a GUI for applet settings using <a href="http://www.pygtk.org/">PyGTK</a>
 
+###Mailing list
+
+<a href="https://groups.google.com/forum/?fromgroups=#!forum/cinnamon_sports-update">mailing list</a>
