@@ -1,3 +1,6 @@
+/*------------------------
+ * Imports
+ * ------------------------*/
 const Soup = imports.gi.Soup;
 
 function LiveScore(a_params){
@@ -11,7 +14,9 @@ function LiveScore(a_params){
 
 	if (a_params != undefined){
 		
+		//DEBUG
 		//global.log("Setting apiRoot = " + a_params.apiRoot);		
+		
 		this.apiRoot = a_params.apiRoot;
 		
 		if (a_params.callbacks!=undefined){
@@ -37,7 +42,9 @@ LiveScore.prototype.initialised = function(){
 
 LiveScore.prototype.loadScores = function(){
 	var url = this.apiRoot;
-	global.log("sports-update@pavanred :: GET " + url);
+	//DEBUG
+	//global.log("sports-update@pavanred :: GET " + url);
+	
 	let this_ = this;
 	let message = Soup.Message.new('GET', url);	
 	this.httpSession.queue_message(message, function(session,message){this_.onHandleResponse(session,message)});	
@@ -45,26 +52,21 @@ LiveScore.prototype.loadScores = function(){
 
 LiveScore.prototype.onHandleResponse = function(session, message) {
 	
-	//global.log("sports-update@pavanred :: response handler:" + message.status_code);
-	
 	if (message.status_code !== 200) {
-		//global.log("sports-update@pavanred : Error status code of: " + message.status_code);
 		this.callbacks.onError(message.status_code);
 		return;
 	}
 	
 	var response = this.parseResponse(message.response_body.data);
 	
-	//global.log("sports-update@pavanred :: response handler:" + response);
-	
 	try {
 		if (this.callbacks.onScoreUpdate != undefined){			
 			this.callbacks.onScoreUpdate(response);
 		}else{
-			global.log("sports-update@pavanred : Error onScoreUpdate callback NOT FOUND!");
+			global.log("sports-update@pavanred : exception onScoreUpdate callback NOT FOUND!");
 		}
 	} catch (e){
-		global.log("sports-update@pavanred : Error triggering score update "  + e);
+		global.log("sports-update@pavanred : exception triggering score update "  + e);
 	}
 }
 
@@ -78,7 +80,8 @@ LiveScore.prototype.parseResponse = function(response){
 	try {
 	
 		var tempStrings = response.split("&");
-			
+		
+		//Identify sport			
 		switch (this.apiRoot){
 		case "http://sports.espn.go.com/nba/bottomline/scores":
 			sport = "basketball";
@@ -102,11 +105,13 @@ LiveScore.prototype.parseResponse = function(response){
 			sport = "football";
 		}
 		
+		//Parse response to get score details
 		for (var i = 0; i < tempStrings.length; i++) {
 			
 			var temp = tempStrings[i];
 			var scoreItem = undefined;
 			
+			//eliminate scores - DELAYED, CANCELLED and FINAL
 			if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1 && temp.indexOf("FINAL") == -1){
 						
 				var equalPos = temp.indexOf("=");
@@ -131,7 +136,7 @@ LiveScore.prototype.parseResponse = function(response){
 			}		
 		}	
 
-		
+		//DEBUG
 		/*for (var i = 0; i < scorelist.length; i++) {
 			global.log("sports-update@pavanred : "  + scorelist[i].Score);
 		}*/

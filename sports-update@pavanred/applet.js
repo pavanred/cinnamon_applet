@@ -1,3 +1,35 @@
+/*
+ *
+ *  Cinnamon applet - sports-update
+ *  - Displays a list of all live score udpates	
+ *  - Live score updates available for :
+ * 	  	- Basketball (NBA, WNBA, NCAA basketball)
+ * 		- American football (NFL)
+ * 		- Baseball (MLB)
+ *      - Ice hocky (NHL)
+ *
+ *  Author
+ *	 Pavan Reddy <pavankumar.kh@gmail.com>
+ *
+ * This file is part of sports-update.
+ *
+ * sports-update is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * sports-update is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with sports-update.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*------------------------
+ * Imports
+ * ------------------------*/
 imports.searchPath.push( imports.ui.appletManager.appletMeta["sports-update@pavanred"].path );
 
 const St = imports.gi.St;
@@ -16,20 +48,25 @@ const GLib = imports.gi.GLib;
 const Mainloop = imports.mainloop;
 
 const LiveScore = imports.liveScore;
+const conf_script = GLib.build_filenamev([global.userdatadir, 'applets/sports-update@pavanred/settings.js']);
+
+/*------------------------
+ * Constants
+ * ------------------------*/
 
 const UUID = 'sports-update@pavanred';
 const PANEL_TOOL_TIP = "Live score udpates";
+const NO_UPDATES = "No live score updates";
+const SETTINGS = "Settings";
 
+//icons
 const FOOTBALL_ICON = "/icon-football.png";
 const BASKETBALL_ICON = "/icon-basketball.png";
 const AFOOTBALL_ICON = "/icon-americanfootball.png";
 const BASEBALL_ICON = "/icon-baseball.png";
 const ICEHOCKEY_ICON = "/icon-icehockey.png";
 
-const SETTINGS = "Settings";
-
-const conf_script = GLib.build_filenamev([global.userdatadir, 'applets/sports-update@pavanred/settings.js']);
-
+//score update urls
 const NBA_APIROOT = "http://sports.espn.go.com/nba/bottomline/scores";
 const NFL_APIROOT = "http://sports.espn.go.com/nfl/bottomline/scores";
 const MLB_APIROOT = "http://sports.espn.go.com/mlb/bottomline/scores";
@@ -50,6 +87,7 @@ MyApplet.prototype = {
 			var sports = [];
 
 			try {
+				
 				//get configuration from settings.js				
 				if(AppSettings.basketball_updates)
 					sports[sports.length] = NBA_APIROOT;
@@ -83,11 +121,12 @@ MyApplet.prototype = {
 				this.sports = sports;
 				this.orientation = orientation;
 				
+				//get and display scores
 				this._getScores();
 
 			}
 			catch (e) {
-				log("error "  + e);
+				log("exception:"  + e);
 			};
 		},
 		
@@ -95,7 +134,7 @@ MyApplet.prototype = {
 			this.menu.toggle();
 		},
 
-		//add a score item
+		//add a score item to the menu
 		_addScoreItem: function(updateText, icon) {
 			
 			try{
@@ -105,12 +144,11 @@ MyApplet.prototype = {
 
 				this.menu.addMenuItem(this.scoreItem);
 			} catch (e){
-				log("error "  + e);}
+				log("exception: "  + e);}
 		},
 		
 		//get score updates for all sports
 		_getScores: function(){
-			log("getScores()");
 			
 			try{
 				let _this = this;
@@ -118,6 +156,7 @@ MyApplet.prototype = {
 				let sports = this.sports;
 				let orientation = this.orientation;
 				
+				//flag sports list beginning to clear/remove items on menu refresh
 				if(sports.length > 0){
 					this.initCycle = sports[0];
 				}
@@ -141,51 +180,64 @@ MyApplet.prototype = {
 						return;
 					}
 					
+					//DEBUG
 					//log("loading scores");		
+					
 					this.ls.loadScores();	
 				}
 				
 				Mainloop.timeout_add_seconds(this.refreshInterval, Lang.bind(this, function() {
-					log("next iteration...");
+					//DEBUG
+					//log("next iteration...");
+					
 					this._getScores();
 				}));
 				
 			} catch (e){
-				log("error "  + e);}		
+				log("exception: "  + e);}		
 		},	
 		
 		_settings: function(){
+			//Open settings file
 			Main.Util.spawnCommandLine("xdg-open " + conf_script);
 		}, 
 		
 		_onSetupError: function() {
 			try{
-				this.set_applet_tooltip(_("Unable to refresh scores"));				
+				this.set_applet_tooltip(_("Unable to refresh scores"));
+				
+				//DEBUG
 				//log("Unable to refresh scores");	
+				
 				this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "sports-update@pavanred : Error. Unable to refresh scores");
 				this.menu.addMenuItem(this.scoreItem);
 			} catch (e){
-				log("error "  + e);}
+				log("exception: "  + e);}
 		},	
 			
 		_onLiveScoreError: function() {
-			//log("status code: " + status_code);			
+			
+			//DEBUG
+			//log("status code: " + status_code);		
+				
 			this.onSetupError();
 		},	
 			
 		_onScoreUpdate: function(scorelist) {
 						
 			try{
-						
+				
+				//DEBUG		
 				/*for (var i = 0; i < scorelist.length; i++) {
 					global.log("sports-update@pavanred : "  + scorelist[i].Score);
 				}*/
 					
+				//if its the beginning of the sports list then clear menu and rebuild
 				if(scorelist[0].Apiroot == this.initCycle){				
 					this.menu.removeAll();
 				}
 		
-				//score items
+				//score items list - set icons
 				for (var i = 1; i < scorelist.length; i++) {
 					
 					var sportIcon;
@@ -210,9 +262,12 @@ MyApplet.prototype = {
 					this._addScoreItem(scorelist[i].Score, sportIcon);
 				}
 				
+				//DEBUG
 				//log(this.menu.length);
+				
+				//no updates menu item
 				if(this.menu.length <= 0){
-					this._addScoreItem("No live updates", null);
+					this._addScoreItem(NO_UPDATES, null);
 				}
 			
 			} catch (e){
@@ -220,7 +275,9 @@ MyApplet.prototype = {
 		}
 };
 
-//Menu
+/*------------------------
+ * Menu
+ * ------------------------*/
 function MyMenu(launcher, orientation) {
 	this._init(launcher, orientation);
 }
@@ -237,7 +294,9 @@ MyMenu.prototype = {
 		}
 };
 
-//menu items - Image and text
+/*------------------------
+ * Menu Item - Icon + Text
+ * ------------------------*/
 function MyPopupMenuItem(){
 	this._init.apply(this, arguments);
 }
@@ -264,12 +323,17 @@ MyPopupMenuItem.prototype = {
 		}
 };
 
+/*------------------------
+ * Main
+ * ------------------------*/
 function main(metadata, orientation) {
 	let myApplet = new MyApplet(orientation);
 	return myApplet;
 };
 
-//logging
+/*------------------------
+ * Logging
+ * ------------------------*/
 function log(message) {
 	global.log(UUID + "::" + log.caller.name + ": " + message);
 }
