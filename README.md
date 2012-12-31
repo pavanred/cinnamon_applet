@@ -13,6 +13,7 @@ sports-update is a simple applet for <a href="http://cinnamon.linuxmint.com/">Ci
 ###Installation
 
 copy the folder sports-update@pavanred/ to ~/.local/share/cinnamon/applets/
+
 cp -a sports-update@pavanred/ ~/.local/share/cinnamon/applets/
 
 ###Usage
