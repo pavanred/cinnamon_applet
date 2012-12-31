@@ -114,6 +114,14 @@ MyApplet.prototype = {
 			let sports = this.sports;
 			let orientation = this.orientation;
 			
+			if(sports.length > 0){
+				this.initCycle = sports[0];
+			}
+			else{
+				this.initCycle = null;
+			}
+			
+			
 			for (var i = 0; i < sports.length; i++) {
 				
 					this.ls = new LiveScore.LiveScore({
@@ -152,10 +160,17 @@ MyApplet.prototype = {
 			
 		_onScoreUpdate: function(scorelist) {
 						
-			this.menu.removeAll();
+						
+			/*for (var i = 0; i < scorelist.length; i++) {
+				global.log("sports-update@pavanred : "  + scorelist[i].Score);
+			}*/
+				
+			if(scorelist[0].Apiroot == this.initCycle){				
+				this.menu.removeAll();
+			}
 	
 			//score items
-			for (var i = 0; i < scorelist.length; i++) {
+			for (var i = 1; i < scorelist.length; i++) {
 				
 				var sportIcon;
 								

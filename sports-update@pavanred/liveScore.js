@@ -75,6 +75,9 @@ LiveScore.prototype.parseResponse = function(response){
 	var tempStrings = response.split("&");
 	
 	var scorelist = [];
+	var dummyItem = {Sport: null, Score: null, Apiroot: this.apiRoot};
+	scorelist[scorelist.length] = dummyItem;
+	
 	
 	switch (this.apiRoot){
 	case "http://sports.espn.go.com/nba/bottomline/scores":
@@ -104,7 +107,7 @@ LiveScore.prototype.parseResponse = function(response){
 		var temp = tempStrings[i];
 		var scoreItem = undefined;
 		
-		if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1){
+		if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1 && temp.indexOf("FINAL") == -1){
 					
 			var equalPos = temp.indexOf("=");
 			
@@ -120,7 +123,7 @@ LiveScore.prototype.parseResponse = function(response){
 					var status = temp.substring(startPos);
 					
 					if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){
-						var scoreItem = {Sport: sport, Score: temp};
+						var scoreItem = {Sport: sport, Score: temp, Apiroot: null};
 						scorelist[scorelist.length] = scoreItem;
 					}	
 				}	
