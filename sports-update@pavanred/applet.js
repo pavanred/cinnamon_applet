@@ -64,6 +64,8 @@ MyApplet.prototype = {
 				if(AppSettings.NCAA_basketball)		
 					sports[sports.length] = NCAA_APIROOT;
 	
+				this.refreshInterval = parseInt(AppSettings.refresh_interval);
+	
 				//set panel icon and tool tip
 				this.set_applet_tooltip(PANEL_TOOL_TIP);	
 				this.set_applet_label("");
@@ -82,14 +84,10 @@ MyApplet.prototype = {
 				this.orientation = orientation;
 				
 				this._getScores();
-				
-				Mainloop.timeout_add_seconds(15, Lang.bind(this, function() {
-					//this.menu.removeAll();
-					this._getScores();
-				}));
+
 			}
 			catch (e) {
-				global.logError(e);
+				log("error "  + e);
 			};
 		},
 		
@@ -99,47 +97,61 @@ MyApplet.prototype = {
 
 		//add a score item
 		_addScoreItem: function(updateText, icon) {
-			let iconPath = AppletDir + icon;
+			
+			try{
+				let iconPath = AppletDir + icon;
 
-			this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText));
+				this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText));
 
-			this.menu.addMenuItem(this.scoreItem);
+				this.menu.addMenuItem(this.scoreItem);
+			} catch (e){
+				log("error "  + e);}
 		},
 		
 		//get score updates for all sports
 		_getScores: function(){
-			//log("get scores");
-			let _this = this;
+			log("getScores()");
 			
-			let sports = this.sports;
-			let orientation = this.orientation;
-			
-			if(sports.length > 0){
-				this.initCycle = sports[0];
-			}
-			else{
-				this.initCycle = null;
-			}
-			
-			
-			for (var i = 0; i < sports.length; i++) {
+			try{
+				let _this = this;
 				
-					this.ls = new LiveScore.LiveScore({
-					'apiRoot': sports[i],
-					'callbacks':{
-						'onError':function(status_code){_this._onLiveScoreError(status_code)},
-						'onScoreUpdate':function(jsonData){_this._onScoreUpdate(jsonData);}
-					}
-				});
+				let sports = this.sports;
+				let orientation = this.orientation;
 				
-				if(!this.ls.initialised()){
-					this._onSetupError(); 
-					return;
+				if(sports.length > 0){
+					this.initCycle = sports[0];
+				}
+				else{
+					this.initCycle = null;
 				}
 				
-				//log("loading scores");		
-				this.ls.loadScores();	
-			}			
+				
+				for (var i = 0; i < sports.length; i++) {
+					
+						this.ls = new LiveScore.LiveScore({
+						'apiRoot': sports[i],
+						'callbacks':{
+							'onError':function(status_code){_this._onLiveScoreError(status_code)},
+							'onScoreUpdate':function(jsonData){_this._onScoreUpdate(jsonData);}
+						}
+					});
+					
+					if(!this.ls.initialised()){
+						this._onSetupError(); 
+						return;
+					}
+					
+					//log("loading scores");		
+					this.ls.loadScores();	
+				}
+				
+				Mainloop.timeout_add_seconds(this.refreshInterval, Lang.bind(this, function() {
+					log("next iteration...");
+					this._getScores();
+				}));
+				
+			} catch (e){
+				log("error "  + e);}		
 		},	
 		
 		_settings: function(){
@@ -147,10 +159,13 @@ MyApplet.prototype = {
 		}, 
 		
 		_onSetupError: function() {
-			this.set_applet_tooltip(_("Unable to refresh scores"));				
-			//log("Unable to refresh scores");	
-			this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "sports-update@pavanred : Error. Unable to refresh scores");
-			this.menu.addMenuItem(this.scoreItem);
+			try{
+				this.set_applet_tooltip(_("Unable to refresh scores"));				
+				//log("Unable to refresh scores");	
+				this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "sports-update@pavanred : Error. Unable to refresh scores");
+				this.menu.addMenuItem(this.scoreItem);
+			} catch (e){
+				log("error "  + e);}
 		},	
 			
 		_onLiveScoreError: function() {
@@ -160,44 +175,48 @@ MyApplet.prototype = {
 			
 		_onScoreUpdate: function(scorelist) {
 						
+			try{
 						
-			/*for (var i = 0; i < scorelist.length; i++) {
-				global.log("sports-update@pavanred : "  + scorelist[i].Score);
-			}*/
-				
-			if(scorelist[0].Apiroot == this.initCycle){				
-				this.menu.removeAll();
-			}
-	
-			//score items
-			for (var i = 1; i < scorelist.length; i++) {
-				
-				var sportIcon;
-								
-				switch (scorelist[i].Sport){
-				case "basketball":
-					sportIcon = BASKETBALL_ICON;
-					break;
-				case "americanfootball":
-					sportIcon = AFOOTBALL_ICON;
-					break;
-				case "baseball":
-					sportIcon = BASEBALL_ICON;
-					break;
-				case "icehockey":
-					sportIcon = ICEHOCKEY_ICON;
-					break;
-				default:
-					sportIcon = FOOTBALL_ICON;
+				/*for (var i = 0; i < scorelist.length; i++) {
+					global.log("sports-update@pavanred : "  + scorelist[i].Score);
+				}*/
+					
+				if(scorelist[0].Apiroot == this.initCycle){				
+					this.menu.removeAll();
+				}
+		
+				//score items
+				for (var i = 1; i < scorelist.length; i++) {
+					
+					var sportIcon;
+									
+					switch (scorelist[i].Sport){
+					case "basketball":
+						sportIcon = BASKETBALL_ICON;
+						break;
+					case "americanfootball":
+						sportIcon = AFOOTBALL_ICON;
+						break;
+					case "baseball":
+						sportIcon = BASEBALL_ICON;
+						break;
+					case "icehockey":
+						sportIcon = ICEHOCKEY_ICON;
+						break;
+					default:
+						sportIcon = FOOTBALL_ICON;
+					}
+					
+					this._addScoreItem(scorelist[i].Score, sportIcon);
 				}
 				
-				this._addScoreItem(scorelist[i].Score, sportIcon);
-			}
+				//log(this.menu.length);
+				if(this.menu.length <= 0){
+					this._addScoreItem("No live updates", null);
+				}
 			
-			Mainloop.timeout_add_seconds(15, Lang.bind(this, function() {
-				//this.menu.removeAll();
-				this._getScores();
-			}));
+			} catch (e){
+				log("Error updating scores "  + e);}
 		}
 };
 

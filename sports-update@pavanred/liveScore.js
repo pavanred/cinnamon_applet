@@ -37,7 +37,7 @@ LiveScore.prototype.initialised = function(){
 
 LiveScore.prototype.loadScores = function(){
 	var url = this.apiRoot;
-	//global.log("sports-update@pavanred :: liveScore.js :loading scores");
+	global.log("sports-update@pavanred :: GET " + url);
 	let this_ = this;
 	let message = Soup.Message.new('GET', url);	
 	this.httpSession.queue_message(message, function(session,message){this_.onHandleResponse(session,message)});	
@@ -71,81 +71,77 @@ LiveScore.prototype.onHandleResponse = function(session, message) {
 LiveScore.prototype.parseResponse = function(response){
 
 	var sport;
-	
-	var tempStrings = response.split("&");
-	
 	var scorelist = [];
 	var dummyItem = {Sport: null, Score: null, Apiroot: this.apiRoot};
 	scorelist[scorelist.length] = dummyItem;
 	
+	try {
 	
-	switch (this.apiRoot){
-	case "http://sports.espn.go.com/nba/bottomline/scores":
-		sport = "basketball";
-		break;
-	case "http://sports.espn.go.com/wnba/bottomline/scores":
-		sport = "basketball";
-		break;
-	case "http://sports.espn.go.com/ncb/bottomline/scores":
-		sport = "basketball";
-		break;		
-	case "http://sports.espn.go.com/nfl/bottomline/scores":
-		sport = "americanfootball";
-		break;
-	case "http://sports.espn.go.com/mlb/bottomline/scores":
-		sport = "baseball";
-		break;
-	case "http://sports.espn.go.com/nhl/bottomline/scores":
-		sport = "icehockey";
-		break;
-	default:
-		sport = "football";
-	}
-	
-	for (var i = 0; i < tempStrings.length; i++) {
-		
-		var temp = tempStrings[i];
-		var scoreItem = undefined;
-		
-		if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1 && temp.indexOf("FINAL") == -1){
-					
-			var equalPos = temp.indexOf("=");
+		var tempStrings = response.split("&");
 			
-			if(equalPos != -1){
-				temp = temp.substring(equalPos+1);
+		switch (this.apiRoot){
+		case "http://sports.espn.go.com/nba/bottomline/scores":
+			sport = "basketball";
+			break;
+		case "http://sports.espn.go.com/wnba/bottomline/scores":
+			sport = "basketball";
+			break;
+		case "http://sports.espn.go.com/ncb/bottomline/scores":
+			sport = "basketball";
+			break;		
+		case "http://sports.espn.go.com/nfl/bottomline/scores":
+			sport = "americanfootball";
+			break;
+		case "http://sports.espn.go.com/mlb/bottomline/scores":
+			sport = "baseball";
+			break;
+		case "http://sports.espn.go.com/nhl/bottomline/scores":
+			sport = "icehockey";
+			break;
+		default:
+			sport = "football";
+		}
+		
+		for (var i = 0; i < tempStrings.length; i++) {
+			
+			var temp = tempStrings[i];
+			var scoreItem = undefined;
+			
+			if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1 && temp.indexOf("FINAL") == -1){
+						
+				var equalPos = temp.indexOf("=");
 				
-				temp = temp.replace("^","");
-				temp = temp.replace(/%20/g," ");
-				
-				var startPos = temp.indexOf("(");
-				
-				if(startPos != -1){
-					var status = temp.substring(startPos);
+				if(equalPos != -1){
+					temp = temp.substring(equalPos+1);
 					
-					if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){
-						var scoreItem = {Sport: sport, Score: temp, Apiroot: null};
-						scorelist[scorelist.length] = scoreItem;
+					temp = temp.replace("^","");
+					temp = temp.replace(/%20/g," ");
+					
+					var startPos = temp.indexOf("(");
+					
+					if(startPos != -1){
+						var status = temp.substring(startPos);
+						
+						if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){
+							var scoreItem = {Sport: sport, Score: temp, Apiroot: null};
+							scorelist[scorelist.length] = scoreItem;
+						}	
 					}	
-				}	
-			}
-		}		
-	}	
-	
-	/*var now = new Date();
-	
-	var scoreItem = {Sport: "football", Score: nowUTC.toString()};
-	var scoreItem1 = {Sport: "football", Score: nowUTC1.toString()};
-	var testlist = [];
-	testlist[0] = scoreItem;testlist[1] = scoreItem1;
-	global.log("sports-update@pavanred : "  + testlist[0].Score);
-	global.log("sports-update@pavanred : "  + testlist[1].Score);
-	return testlist;*/
-	
-	for (var i = 0; i < scorelist.length; i++) {
-		global.log("sports-update@pavanred : "  + scorelist[i].Score);
-	}
-	
-	return scorelist;
+				}
+			}		
+		}	
+
+		
+		/*for (var i = 0; i < scorelist.length; i++) {
+			global.log("sports-update@pavanred : "  + scorelist[i].Score);
+		}*/
+		
+		return scorelist;
+		
+	} catch (e){
+		global.log("sports-update@pavanred : Error parsing score updates "  + e);
+		return scorelist;
+	} 
 }
 
 

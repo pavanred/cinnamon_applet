@@ -2,7 +2,7 @@
 
 const Values = {
 
-	refresh_interval: 15,  // seconds
+	refresh_interval: 60,  // seconds
 
     //live score updates for sports
 	basketball_updates: true,  //NBA - National Basketball Association (USA)
