@@ -58,6 +58,7 @@ const UUID = 'sports-update@pavanred';
 const PANEL_TOOL_TIP = "Live score udpates";
 const NO_UPDATES = "No live score updates";
 const SETTINGS = "Settings";
+const LIVE = "LIVE";
 
 //icons
 const FOOTBALL_ICON = "/icon-football.png";
@@ -156,13 +157,15 @@ MyApplet.prototype = {
 				let sports = this.sports;
 				let orientation = this.orientation;
 				
-				//flag sports list beginning to clear/remove items on menu refresh
+				//flag sports list beginning and end to clear/remove items on menu refresh
 				if(sports.length > 0){
 					this.initCycle = sports[0];
 				}
 				else{
 					this.initCycle = null;
 				}
+				
+				this.endCycle = sports[sports.length - 1];
 				
 				
 				for (var i = 0; i < sports.length; i++) {
@@ -182,7 +185,7 @@ MyApplet.prototype = {
 					
 					//DEBUG
 					//log("loading scores");		
-					
+
 					this.ls.loadScores();	
 				}
 				
@@ -233,7 +236,8 @@ MyApplet.prototype = {
 				}*/
 					
 				//if its the beginning of the sports list then clear menu and rebuild
-				if(scorelist[0].Apiroot == this.initCycle){				
+				if(scorelist[0].Apiroot == this.initCycle){			
+					this.set_applet_label("");
 					this.menu.removeAll();
 				}
 		
@@ -259,16 +263,19 @@ MyApplet.prototype = {
 						sportIcon = FOOTBALL_ICON;
 					}
 					
+					this.set_applet_label(LIVE);
 					this._addScoreItem(scorelist[i].Score, sportIcon);
 				}
 				
 				//DEBUG
 				//log(this.menu.length);
-				
+
 				//no updates menu item
-				if(this.menu.length <= 0){
-					this._addScoreItem(NO_UPDATES, null);
+				if(this.menu.length <= 0 && scorelist[scorelist.length - 1].Apiroot == this.endCycle){
+					//log("no updates");
+					this._addScoreItem(NO_UPDATES, null);					
 				}
+
 			
 			} catch (e){
 				log("Error updating scores "  + e);}

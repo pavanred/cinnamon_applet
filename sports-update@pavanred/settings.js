@@ -11,5 +11,5 @@ const Values = {
 	baseball_updates: true,  			//MLB - Major League Baseball (USA)
 	icehockey_updates: true,  			//NHL - National Hockey League (USA)
 	women_basketball_updates: true,  	//WNBA - Women's National Basketball Association (USA)
-	NCAA_basketball: true,   			//NCAA -  National Collegiate Athletic Association - Basketball (USA)	
+	NCAA_basketball: false,   			//NCAA -  National Collegiate Athletic Association - Basketball (USA)	
 };

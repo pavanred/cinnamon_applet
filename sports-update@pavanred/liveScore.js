@@ -128,7 +128,7 @@ LiveScore.prototype.parseResponse = function(response){
 						var status = temp.substring(startPos);
 						
 						if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){
-							var scoreItem = {Sport: sport, Score: temp, Apiroot: null};
+							var scoreItem = {Sport: sport, Score: temp, Apiroot: this.apiRoot};
 							scorelist[scorelist.length] = scoreItem;
 						}	
 					}	
