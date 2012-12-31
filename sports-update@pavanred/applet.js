@@ -78,13 +78,13 @@ MyApplet.prototype = {
                 this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
                 this._applet_context_menu.addMenuItem(this.settingsMenu);
 				
-				//this._scoreTimer(sports, orientation);
-				//this._getScores(sports, orientation);
-				
 				this.sports = sports;
 				this.orientation = orientation;
 				
-				Mainloop.timeout_add_seconds(AppSettings.refresh_interval, Lang.bind(this, function() {
+				this._getScores();
+				
+				Mainloop.timeout_add_seconds(15, Lang.bind(this, function() {
+					//this.menu.removeAll();
 					this._getScores();
 				}));
 			}
@@ -108,13 +108,11 @@ MyApplet.prototype = {
 		
 		//get score updates for all sports
 		_getScores: function(){
-			log("get scores");
+			//log("get scores");
 			let _this = this;
 			
 			let sports = this.sports;
 			let orientation = this.orientation;
-			
-			this.menu = new MyMenu(this, orientation);
 			
 			for (var i = 0; i < sports.length; i++) {
 				
@@ -154,6 +152,8 @@ MyApplet.prototype = {
 			
 		_onScoreUpdate: function(scorelist) {
 						
+			this.menu.removeAll();
+	
 			//score items
 			for (var i = 0; i < scorelist.length; i++) {
 				
@@ -179,7 +179,8 @@ MyApplet.prototype = {
 				this._addScoreItem(scorelist[i].Score, sportIcon);
 			}
 			
-			Mainloop.timeout_add_seconds(AppSettings.refresh_interval, Lang.bind(this, function() {
+			Mainloop.timeout_add_seconds(15, Lang.bind(this, function() {
+				//this.menu.removeAll();
 				this._getScores();
 			}));
 		}

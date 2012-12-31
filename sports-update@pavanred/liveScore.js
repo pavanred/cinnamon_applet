@@ -104,7 +104,7 @@ LiveScore.prototype.parseResponse = function(response){
 		var temp = tempStrings[i];
 		var scoreItem = undefined;
 		
-		if(temp.indexOf("_left") !== -1 && temp.indexOf("FINAL") == -1 && temp.indexOf("CANCELLED") == -1){
+		if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1){
 					
 			var equalPos = temp.indexOf("=");
 			
@@ -127,7 +127,21 @@ LiveScore.prototype.parseResponse = function(response){
 			}
 		}		
 	}	
-
+	
+	/*var now = new Date();
+	
+	var scoreItem = {Sport: "football", Score: nowUTC.toString()};
+	var scoreItem1 = {Sport: "football", Score: nowUTC1.toString()};
+	var testlist = [];
+	testlist[0] = scoreItem;testlist[1] = scoreItem1;
+	global.log("sports-update@pavanred : "  + testlist[0].Score);
+	global.log("sports-update@pavanred : "  + testlist[1].Score);
+	return testlist;*/
+	
+	for (var i = 0; i < scorelist.length; i++) {
+		global.log("sports-update@pavanred : "  + scorelist[i].Score);
+	}
+	
 	return scorelist;
 }
 
