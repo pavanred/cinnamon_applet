@@ -66,6 +66,10 @@ const BASKETBALL_ICON = "/icon-basketball.png";
 const AFOOTBALL_ICON = "/icon-americanfootball.png";
 const BASEBALL_ICON = "/icon-baseball.png";
 const ICEHOCKEY_ICON = "/icon-icehockey.png";
+const GOLF_ICON = "/icon-golf.png";
+const TENNIS_ICON = "/icon-tennis.png";
+const MOTORSPORT_ICON = "/icon-racing.png";
+
 
 //score update urls
 const NBA_APIROOT = "http://sports.espn.go.com/nba/bottomline/scores";
@@ -74,6 +78,13 @@ const MLB_APIROOT = "http://sports.espn.go.com/mlb/bottomline/scores";
 const NHL_APIROOT = "http://sports.espn.go.com/nhl/bottomline/scores";
 const WNBA_APIROOT = "http://sports.espn.go.com/wnba/bottomline/scores";
 const NCAA_APIROOT = "http://sports.espn.go.com/ncb/bottomline/scores";
+const FB_US_APIROOT = "http://soccernet.espn.go.com/bottomline/scores/scores?scoresSource=usa";
+const FB_UK_APIROOT = "http://soccernet.espn.go.com/bottomline/scores/scores?scoresSource=uk";
+const FB_INT_APIROOT = "http://soccernet.espn.go.com/bottomline/scores/scores?scoresSource=inter";
+const FB_EUR_APIROOT = "http://soccernet.espn.go.com/bottomline/scores/scores?scoresSource=euro";
+const GOLF_APIROOT = "http://sports.espn.go.com/sports/golf/bottomLineGolfLeaderboard";
+const TENNIS_APIROOT = "http://sports.espn.go.com/sports/tennis/bottomline/scores";
+const MOTOR_APIROOT = "http://sports.espn.go.com/rpm/bottomline/race";
 
 function MyApplet(orientation) {
 	this._init(orientation);
@@ -101,8 +112,22 @@ MyApplet.prototype = {
 				if(AppSettings.women_basketball_updates)
 					sports[sports.length] = WNBA_APIROOT;	
 				if(AppSettings.NCAA_basketball)		
-					sports[sports.length] = NCAA_APIROOT;
-	
+					sports[sports.length] = NCAA_APIROOT;				
+				if(AppSettings.golf_updates)
+					sports[sports.length] = GOLF_APIROOT;	
+				if(AppSettings.motorsports_updates)		
+					sports[sports.length] = MOTOR_APIROOT;
+				if(AppSettings.tennis_updates)
+					sports[sports.length] = TENNIS_APIROOT;	
+				if(AppSettings.football_europe_updates)		
+					sports[sports.length] = FB_EUR_APIROOT;	
+				if(AppSettings.football_international_updates)		
+					sports[sports.length] = FB_INT_APIROOT;
+				if(AppSettings.football_uk_updates)
+					sports[sports.length] = FB_UK_APIROOT;	
+				if(AppSettings.football_usa_updates)		
+					sports[sports.length] = FB_US_APIROOT;
+					
 				this.refreshInterval = parseInt(AppSettings.refresh_interval);
 	
 				//set panel icon and tool tip
@@ -258,6 +283,18 @@ MyApplet.prototype = {
 						break;
 					case "icehockey":
 						sportIcon = ICEHOCKEY_ICON;
+						break;
+					case "golf":
+						sportIcon = GOLF_ICON;
+						break;
+					case "football":
+						sportIcon = FOOTBALL_ICON;
+						break;
+					case "motorsport":
+						sportIcon = MOTORSPORT_ICON;
+						break;
+					case "tennis":
+						sportIcon = TENNIS_ICON;
 						break;
 					default:
 						sportIcon = FOOTBALL_ICON;

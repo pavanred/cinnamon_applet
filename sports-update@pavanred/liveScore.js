@@ -101,6 +101,27 @@ LiveScore.prototype.parseResponse = function(response){
 		case "http://sports.espn.go.com/nhl/bottomline/scores":
 			sport = "icehockey";
 			break;
+		case "http://soccernet.espn.go.com/bottomline/scores/scores?scoresSource=usa":
+			sport = "football";
+			break;
+		case "http://soccernet.espn.go.com/bottomline/scores/scores?scoresSource=uk":
+			sport = "football";
+			break;
+		case "http://soccernet.espn.go.com/bottomline/scores/scores?scoresSource=inter":
+			sport = "football";
+			break;
+		case "http://soccernet.espn.go.com/bottomline/scores/scores?scoresSource=euro":
+			sport = "football";
+			break;
+		case "http://sports.espn.go.com/sports/golf/bottomLineGolfLeaderboard":
+			sport = "golf";
+			break;
+		case "http://sports.espn.go.com/sports/tennis/bottomline/scores":
+			sport = "tennis";
+			break;
+		case "http://sports.espn.go.com/rpm/bottomline/race":
+			sport = "motorsport";
+			break;
 		default:
 			sport = "football";
 		}
