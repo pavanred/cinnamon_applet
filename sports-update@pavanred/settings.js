@@ -8,7 +8,7 @@ const Values = {
     
     //football
     football_usa_updates: true,
-    football_uk_updates: true,
+    football_uk_updates: true,			//Barclays Premier League
     football_international_updates: true,
     football_europe_updates: true,
     

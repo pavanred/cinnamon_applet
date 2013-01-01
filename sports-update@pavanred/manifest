@@ -1,10 +1,5 @@
 # All files provided in the release are listed here.
 applet.js
-icon-americanfootball.png
-icon-baseball.png
-icon-basketball.png
-icon-football.png
-icon-icehockey.png
 liveScore.js
 metadata.json
 settings.js

@@ -133,7 +133,8 @@ LiveScore.prototype.parseResponse = function(response){
 			var scoreItem = undefined;
 			
 			//eliminate scores - DELAYED, CANCELLED and FINAL
-			if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1 && temp.indexOf("FINAL") == -1){
+			if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1
+			 && temp.indexOf("FINAL") == -1 && temp.indexOf("Full%2dtime") == -1){
 						
 				var equalPos = temp.indexOf("=");
 				
@@ -142,6 +143,7 @@ LiveScore.prototype.parseResponse = function(response){
 					
 					temp = temp.replace("^","");
 					temp = temp.replace(/%20/g," ");
+					temp = temp.replace(/%2d/g,"-");
 					
 					var startPos = temp.indexOf("(");
 					
