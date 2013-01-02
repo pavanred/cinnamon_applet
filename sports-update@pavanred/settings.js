@@ -1,8 +1,6 @@
 
 const Values = {
-
-	refresh_interval: 60,				// seconds
-
+	
     //live score updates for sports
     //true or false
     
@@ -35,4 +33,17 @@ const Values = {
 	//golf
 	golf_updates: true,
 	
+	
+	/*-----------------------------------------------------------*/
+	
+	
+	refresh_interval: 60,				// seconds
+	
+	display_cancelled: true				// Display games that are cancelled e.g. [Ice Hockey] Toronto at Detroit (CANCELLED)
+	
+	display_delayed: true				// Display games that are delayed 
+	
+	display_finalscores: true			/* Persist the display of final scores for a while after the game is complete
+										   (till the scores are available in the input stream)
+										   e.g Dallas 103  Washington 94 (FINAL)									*/
 };
