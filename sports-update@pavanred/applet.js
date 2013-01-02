@@ -113,13 +113,13 @@ MyApplet.prototype = {
 					sports[sports.length] = WNBA_APIROOT;	
 				if(AppSettings.NCAA_basketball)		
 					sports[sports.length] = NCAA_APIROOT;				
-				if(AppSettings.golf_updates)
+				/*if(AppSettings.golf_updates)
 					sports[sports.length] = GOLF_APIROOT;	
 				if(AppSettings.motorsports_updates)		
 					sports[sports.length] = MOTOR_APIROOT;
 				if(AppSettings.tennis_updates)
 					sports[sports.length] = TENNIS_APIROOT;	
-				if(AppSettings.football_europe_updates)		
+				if(AppSettings.football_europe_updates)	*/	
 					sports[sports.length] = FB_EUR_APIROOT;	
 				if(AppSettings.football_international_updates)		
 					sports[sports.length] = FB_INT_APIROOT;

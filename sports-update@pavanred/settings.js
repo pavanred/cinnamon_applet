@@ -13,10 +13,10 @@ const Values = {
     football_europe_updates: true,
     
     //tennis
-    tennis_updates: true,
+    //tennis_updates: true,
     
     //motorsports
-    motorsports_updates: true,
+    //motorsports_updates: true,
     
     //basketball
 	basketball_updates: true,  			//NBA - National Basketball Association (USA)
@@ -33,6 +33,6 @@ const Values = {
 	icehockey_updates: true,  			//NHL - National Hockey League (USA)
 	
 	//golf
-	golf_updates: true,
+	//golf_updates: true,
 	
 };
