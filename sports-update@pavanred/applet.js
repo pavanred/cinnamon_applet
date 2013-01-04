@@ -7,6 +7,7 @@
  * 		- American football (NFL)
  * 		- Baseball (MLB)
  *      - Ice hocky (NHL)
+ * 		- Football (International, UK, USA and European)
  *
  *  Author
  *	 Pavan Reddy <pavankumar.kh@gmail.com>
@@ -116,7 +117,7 @@ MyApplet.prototype = {
 					sports[sports.length] = WNBA_APIROOT;	
 				if(AppSettings.NCAA_basketball)		
 					sports[sports.length] = NCAA_APIROOT;				
-				/*if(AppSettings.golf_updates)
+				if(AppSettings.golf_updates)
 					sports[sports.length] = GOLF_APIROOT;	
 				if(AppSettings.motorsports_updates)		
 					sports[sports.length] = MOTOR_APIROOT;
@@ -242,6 +243,8 @@ MyApplet.prototype = {
 				let sports = this.sports;
 				let orientation = this.orientation;
 				
+				this.refreshInterval = parseInt(AppSettings.refresh_interval);
+				
 				//flag sports list beginning and end to clear/remove items on menu refresh
 				if(sports.length > 0){
 					this.initCycle = sports[0].Apiroot;
@@ -257,7 +260,10 @@ MyApplet.prototype = {
 					
 						this.ls = new LiveScore.LiveScore({
 						'apiRoot': sports[i].Apiroot,
-						'icon': sports[i].Icon,						
+						'icon': sports[i].Icon,
+						'displayCancelled': AppSettings.display_cancelled,
+						'displayDelayed': AppSettings.display_delayed,
+						'displayFinal': AppSettings.display_finalscores,						
 						'callbacks':{
 							'onError':function(status_code){_this._onLiveScoreError(status_code)},
 							'onScoreUpdate':function(response){_this._onScoreUpdate(response);}
@@ -322,7 +328,7 @@ MyApplet.prototype = {
 				
 				//DEBUG		
 				/*for (var i = 0; i < scorelist.length; i++) {
-					global.log("sports-update@pavanred : "  + scorelist[i].Score);
+					global.log("sports-update@pavanred : "  + scorelist[i]);
 				}*/
 					
 				//identifying no updates change - v1.0.1
