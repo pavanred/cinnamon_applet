@@ -97,11 +97,14 @@ MyApplet.prototype = {
 			Applet.TextIconApplet.prototype._init.call(this, orientation);
 
 			var sports = [];
-
+			this.responseCount = 0;
+			
 			try {
 				
+				//removing code redudancies - apiroot and icons - v1.0.1
+				
 				//get configuration from settings.js				
-				if(AppSettings.basketball_updates)
+				/*if(AppSettings.basketball_updates)
 					sports[sports.length] = NBA_APIROOT;
 				if(AppSettings.americanfootball_updates)
 					sports[sports.length] = NFL_APIROOT;	
@@ -126,7 +129,63 @@ MyApplet.prototype = {
 				if(AppSettings.football_uk_updates)
 					sports[sports.length] = FB_UK_APIROOT;	
 				if(AppSettings.football_usa_updates)		
-					sports[sports.length] = FB_US_APIROOT;
+					sports[sports.length] = FB_US_APIROOT;*/
+					
+				if(AppSettings.basketball_updates){
+					var sportItem = {Apiroot: NBA_APIROOT, Icon: BASKETBALL_ICON};
+					sports[sports.length] = sportItem;
+				}
+				if(AppSettings.americanfootball_updates){
+					var sportItem = {Apiroot: NFL_APIROOT, Icon: AFOOTBALL_ICON};
+					sports[sports.length] = sportItem;
+				}	
+				if(AppSettings.baseball_updates){
+					var sportItem = {Apiroot: MLB_APIROOT, Icon: BASEBALL_ICON};
+					sports[sports.length] = sportItem;
+				}
+				if(AppSettings.icehockey_updates){		
+					var sportItem = {Apiroot: NHL_APIROOT, Icon: ICEHOCKEY_ICON};
+					sports[sports.length] = sportItem;
+				}
+				if(AppSettings.women_basketball_updates){
+					var sportItem = {Apiroot: WNBA_APIROOT, Icon: BASKETBALL_ICON};
+					sports[sports.length] = sportItem;
+				}	
+				if(AppSettings.NCAA_basketball){
+					var sportItem = {Apiroot: NCAA_APIROOT, Icon: BASKETBALL_ICON};
+					sports[sports.length] = sportItem;			
+				}
+				if(AppSettings.football_europe_updates){		
+					var sportItem = {Apiroot: FB_EUR_APIROOT, Icon: FOOTBALL_ICON};
+					sports[sports.length] = sportItem;		
+				}
+				if(AppSettings.football_international_updates){		
+					var sportItem = {Apiroot: FB_INT_APIROOT, Icon: FOOTBALL_ICON};
+					sports[sports.length] = sportItem;
+				}
+				if(AppSettings.football_uk_updates){
+					var sportItem = {Apiroot: FB_UK_APIROOT, Icon: FOOTBALL_ICON};
+					sports[sports.length] = sportItem;	
+				}
+				if(AppSettings.football_usa_updates){
+					var sportItem = {Apiroot: FB_US_APIROOT, Icon: FOOTBALL_ICON};
+					sports[sports.length] = sportItem;		
+				}
+
+				//in a future release 
+				/*if(AppSettings.golf_updates){
+					var sportItem = {Apiroot: GOLF_APIROOT, Icon: GOLF_APIROOT};
+					sports[sports.length] = sportItem;	
+				}
+				if(AppSettings.motorsports_updates){
+					var sportItem = {Apiroot: MOTOR_APIROOT, Icon: MOTORSPORT_ICON};
+					sports[sports.length] = sportItem;	
+				}
+				if(AppSettings.tennis_updates){
+					var sportItem = {Apiroot: TENNIS_APIROOT, Icon: MOTORSPORT_ICON};
+					sports[sports.length] = sportItem;	
+				}*/
+				
 					
 				this.refreshInterval = parseInt(AppSettings.refresh_interval);
 	
@@ -146,6 +205,7 @@ MyApplet.prototype = {
 				
 				this.sports = sports;
 				this.orientation = orientation;
+				this.liveScores = [];
 				
 				//get and display scores
 				this._getScores();
@@ -184,22 +244,23 @@ MyApplet.prototype = {
 				
 				//flag sports list beginning and end to clear/remove items on menu refresh
 				if(sports.length > 0){
-					this.initCycle = sports[0];
+					this.initCycle = sports[0].Apiroot;
 				}
 				else{
 					this.initCycle = null;
 				}
 				
-				this.endCycle = sports[sports.length - 1];
+				this.endCycle = sports[sports.length - 1].Apiroot;
 				
 				
 				for (var i = 0; i < sports.length; i++) {
 					
 						this.ls = new LiveScore.LiveScore({
-						'apiRoot': sports[i],
+						'apiRoot': sports[i].Apiroot,
+						'icon': sports[i].Icon,						
 						'callbacks':{
 							'onError':function(status_code){_this._onLiveScoreError(status_code)},
-							'onScoreUpdate':function(jsonData){_this._onScoreUpdate(jsonData);}
+							'onScoreUpdate':function(response){_this._onScoreUpdate(response);}
 						}
 					});
 					
@@ -251,23 +312,32 @@ MyApplet.prototype = {
 			this.onSetupError();
 		},	
 			
-		_onScoreUpdate: function(scorelist) {
+		_onScoreUpdate: function(response) {
 						
 			try{
+				
+				var apiRoot = response.Apiroot;
+				var icon = response.Icon;
+				var scorelist = response.Scores;
 				
 				//DEBUG		
 				/*for (var i = 0; i < scorelist.length; i++) {
 					global.log("sports-update@pavanred : "  + scorelist[i].Score);
 				}*/
 					
+				//identifying no updates change - v1.0.1
+					
 				//if its the beginning of the sports list then clear menu and rebuild
-				if(scorelist[0].Apiroot == this.initCycle){			
+				/*if(scorelist[0].Apiroot == this.initCycle){			
 					this.set_applet_label("");
 					this.menu.removeAll();
-				}
+				}*/
+				
+				
+				//identifying sport icons change - v1.0.1
 		
 				//score items list - set icons
-				for (var i = 1; i < scorelist.length; i++) {
+				/*for (var i = 1; i < scorelist.length; i++) {
 					
 					var sportIcon;
 									
@@ -311,8 +381,39 @@ MyApplet.prototype = {
 				if(this.menu.length <= 0 && scorelist[scorelist.length - 1].Apiroot == this.endCycle){
 					//log("no updates");
 					this._addScoreItem(NO_UPDATES, null);					
+				}*/
+				
+				if(this.menu.length <= 0){
+					this.liveScores = [];
+					this._addScoreItem(NO_UPDATES, null);	
 				}
-
+				
+				this.responseCount = this.responseCount + 1;
+				
+				if(this.responseCount == this.sports.length){
+					
+					this.responseCount = 0;
+					this.menu.removeAll();
+					
+					if(this.liveScores.length <= 0){
+							this._addScoreItem(NO_UPDATES, null);	
+					}
+					else{
+						this.set_applet_label(LIVE);
+						
+						for (var i = 0; i < this.liveScores.length; i++) {							
+							this._addScoreItem(this.liveScores[i].Score, this.liveScores[i].Icon);
+						}
+					}
+					
+					this.liveScores = [];
+				}
+				else{
+					
+					for (var i = 0; i < scorelist.length; i++) {							
+						this.liveScores[this.liveScores.length] = {Score: scorelist[i],Icon: icon};
+					}					
+				}
 			
 			} catch (e){
 				log("Error updating scores "  + e);}
