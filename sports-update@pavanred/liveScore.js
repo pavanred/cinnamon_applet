@@ -7,6 +7,9 @@ function LiveScore(a_params){
 
 	this.apiRoot=undefined;
 	this.icon=undefined;
+	this.displayCancelled = undefined;
+	this.displayDelayed = undefined;
+	this.displayFinal = undefined;
 
 	this.callbacks={
 		onError:undefined,
@@ -20,6 +23,9 @@ function LiveScore(a_params){
 		
 		this.apiRoot = a_params.apiRoot;
 		this.icon = a_params.icon;
+		this.displayCancelled = a_params.displayCancelled;
+		this.displayDelayed = a_params.displayDelayed;
+		this.displayFinal = a_params.displayFinal;
 		
 		if (a_params.callbacks!=undefined){
 			this.callbacks.onError=a_params.callbacks.onError;
@@ -75,7 +81,7 @@ LiveScore.prototype.onHandleResponse = function(session, message) {
 LiveScore.prototype.parseResponse = function(response){
 
 	var sport;
-	var scorelist = [];
+	this.scorelist = [];
 	
 	//handling no score updates in applet.js - v1.0.1
 	
@@ -138,31 +144,25 @@ LiveScore.prototype.parseResponse = function(response){
 			
 			var temp = tempStrings[i];			
 			
+			//adding user defined options for DELAYED, CANCELLED and FINAL - v1.0.2
+			
 			//eliminate scores - DELAYED, CANCELLED and FINAL
-			if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1
+			/*if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1
+			 && temp.indexOf("FINAL") == -1 && temp.indexOf("Full%2dtime") == -1 && temp.indexOf("Postponed") == -1){*/
+
+			 if(temp.indexOf("_left") !== -1 && ((temp.indexOf("FINAL") !== -1 || temp.indexOf("Full%2dtime") !== -1) && this.displayFinal)){
+				this.parseScoreText(temp);
+			}
+			else if(temp.indexOf("_left") !== -1 && temp.indexOf("CANCELLED") !== -1 && this.displayCancelled){
+				this.parseScoreText(temp);
+			}
+			else if(temp.indexOf("_left") !== -1 && ((temp.indexOf("DELAYED") !== -1 || temp.indexOf("Postponed") !== -1) && this.displayDelayed)){
+				this.parseScoreText(temp);
+			}
+			else if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1
 			 && temp.indexOf("FINAL") == -1 && temp.indexOf("Full%2dtime") == -1 && temp.indexOf("Postponed") == -1){
-						
-				var equalPos = temp.indexOf("=");
-				
-				if(equalPos != -1){
-					temp = temp.substring(equalPos+1);
-					
-					temp = temp.replace("^","");
-					temp = temp.replace(/%20/g," ");
-					temp = temp.replace(/%2d/g,"-");
-					
-					var startPos = temp.indexOf("(");
-					
-					if(startPos != -1){
-						var status = temp.substring(startPos);
-						
-						if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){
-							//var scoreItem = {Score: temp, Apiroot: this.apiRoot, Icon: this.icon};							
-							scorelist[scorelist.length] = temp;
-						}	
-					}	
-				}
-			}		
+				this.parseScoreText(temp);
+			}
 		}	
 
 		//DEBUG
@@ -170,12 +170,32 @@ LiveScore.prototype.parseResponse = function(response){
 			global.log("sports-update@pavanred : "  + scorelist[i].Score);
 		}*/
 		
-		return {Apiroot: this.apiRoot, Icon: this.icon, Scores: scorelist};
+		return {Apiroot: this.apiRoot, Icon: this.icon, Scores: this.scorelist};
 		
 	} catch (e){
 		global.log("sports-update@pavanred : Error parsing score updates "  + e);
-		return scorelist;
+		return {Apiroot: this.apiRoot, Icon: this.icon, Scores: this.scorelist};
 	} 
 }
 
-
+LiveScore.prototype.parseScoreText = function(temp){
+	var equalPos = temp.indexOf("=");
+				
+	if(equalPos != -1){
+		temp = temp.substring(equalPos+1);
+					
+		temp = temp.replace("^","");
+		temp = temp.replace(/%20/g," ");
+		temp = temp.replace(/%2d/g,"-");
+					
+		var startPos = temp.indexOf("(");
+					
+		if(startPos != -1){
+			var status = temp.substring(startPos);
+					
+			if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){												
+				this.scorelist[this.scorelist.length] = temp;
+			}	
+		}	
+	}
+}

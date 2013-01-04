@@ -7,6 +7,7 @@
  * 		- American football (NFL)
  * 		- Baseball (MLB)
  *      - Ice hocky (NHL)
+ * 		- Football (International, UK, USA and European)
  *
  *  Author
  *	 Pavan Reddy <pavankumar.kh@gmail.com>
@@ -46,6 +47,7 @@ const AppSettings = AppletMeta.settings.Values;
 const Util = imports.misc.util;
 const GLib = imports.gi.GLib;
 const Mainloop = imports.mainloop;
+const Gtk = imports.gi.Gtk;
 
 const LiveScore = imports.liveScore;
 const conf_script = GLib.build_filenamev([global.userdatadir, 'applets/sports-update@pavanred/settings.js']);
@@ -58,6 +60,7 @@ const UUID = 'sports-update@pavanred';
 const PANEL_TOOL_TIP = "Live score udpates";
 const NO_UPDATES = "No live score updates";
 const SETTINGS = "Settings";
+const REFRESH = "Refresh";
 const LIVE = "LIVE";
 
 //icons
@@ -116,7 +119,7 @@ MyApplet.prototype = {
 					sports[sports.length] = WNBA_APIROOT;	
 				if(AppSettings.NCAA_basketball)		
 					sports[sports.length] = NCAA_APIROOT;				
-				/*if(AppSettings.golf_updates)
+				if(AppSettings.golf_updates)
 					sports[sports.length] = GOLF_APIROOT;	
 				if(AppSettings.motorsports_updates)		
 					sports[sports.length] = MOTOR_APIROOT;
@@ -202,6 +205,10 @@ MyApplet.prototype = {
 				//settings menu 
                 this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
                 this._applet_context_menu.addMenuItem(this.settingsMenu);
+                
+                //refresh menu
+                this.refreshMenu = new Applet.MenuItem(_(REFRESH), Gtk.STOCK_REFRESH ,Lang.bind(this,this._refresh));
+                this._applet_context_menu.addMenuItem(this.refreshMenu);
 				
 				this.sports = sports;
 				this.orientation = orientation;
@@ -242,6 +249,8 @@ MyApplet.prototype = {
 				let sports = this.sports;
 				let orientation = this.orientation;
 				
+				this.refreshInterval = parseInt(AppSettings.refresh_interval);
+				
 				//flag sports list beginning and end to clear/remove items on menu refresh
 				if(sports.length > 0){
 					this.initCycle = sports[0].Apiroot;
@@ -257,7 +266,10 @@ MyApplet.prototype = {
 					
 						this.ls = new LiveScore.LiveScore({
 						'apiRoot': sports[i].Apiroot,
-						'icon': sports[i].Icon,						
+						'icon': sports[i].Icon,
+						'displayCancelled': AppSettings.display_cancelled,
+						'displayDelayed': AppSettings.display_delayed,
+						'displayFinal': AppSettings.display_finalscores,						
 						'callbacks':{
 							'onError':function(status_code){_this._onLiveScoreError(status_code)},
 							'onScoreUpdate':function(response){_this._onScoreUpdate(response);}
@@ -291,6 +303,12 @@ MyApplet.prototype = {
 			Main.Util.spawnCommandLine("xdg-open " + conf_script);
 		}, 
 		
+		_refresh: function(){
+			if(this.sports.length > 0){
+				this._getScores();
+			}
+		},
+		
 		_onSetupError: function() {
 			try{
 				this.set_applet_tooltip(_("Unable to refresh scores"));
@@ -322,7 +340,7 @@ MyApplet.prototype = {
 				
 				//DEBUG		
 				/*for (var i = 0; i < scorelist.length; i++) {
-					global.log("sports-update@pavanred : "  + scorelist[i].Score);
+					global.log("sports-update@pavanred : "  + scorelist[i]);
 				}*/
 					
 				//identifying no updates change - v1.0.1
