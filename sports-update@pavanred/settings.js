@@ -39,7 +39,7 @@ const Values = {
 	
 	refresh_interval: 60,				// seconds
 	
-	display_cancelled: false,				// Display games that are cancelled e.g. [Ice Hockey] Toronto at Detroit (CANCELLED)
+	display_cancelled: true,				// Display games that are cancelled e.g. [Ice Hockey] Toronto at Detroit (CANCELLED)
 	
 	display_delayed: false,				// Display games that are delayed 
 	

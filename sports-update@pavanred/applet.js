@@ -47,6 +47,7 @@ const AppSettings = AppletMeta.settings.Values;
 const Util = imports.misc.util;
 const GLib = imports.gi.GLib;
 const Mainloop = imports.mainloop;
+const Gtk = imports.gi.Gtk;
 
 const LiveScore = imports.liveScore;
 const conf_script = GLib.build_filenamev([global.userdatadir, 'applets/sports-update@pavanred/settings.js']);
@@ -59,6 +60,7 @@ const UUID = 'sports-update@pavanred';
 const PANEL_TOOL_TIP = "Live score udpates";
 const NO_UPDATES = "No live score updates";
 const SETTINGS = "Settings";
+const REFRESH = "Refresh";
 const LIVE = "LIVE";
 
 //icons
@@ -203,6 +205,10 @@ MyApplet.prototype = {
 				//settings menu 
                 this.settingsMenu = new Applet.MenuItem(_(SETTINGS), 'system-run-symbolic',Lang.bind(this,this._settings));
                 this._applet_context_menu.addMenuItem(this.settingsMenu);
+                
+                //refresh menu
+                this.refreshMenu = new Applet.MenuItem(_(REFRESH), Gtk.STOCK_REFRESH ,Lang.bind(this,this._refresh));
+                this._applet_context_menu.addMenuItem(this.refreshMenu);
 				
 				this.sports = sports;
 				this.orientation = orientation;
@@ -296,6 +302,12 @@ MyApplet.prototype = {
 			//Open settings file
 			Main.Util.spawnCommandLine("xdg-open " + conf_script);
 		}, 
+		
+		_refresh: function(){
+			if(this.sports.length > 0){
+				this._getScores();
+			}
+		},
 		
 		_onSetupError: function() {
 			try{
