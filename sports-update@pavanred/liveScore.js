@@ -6,6 +6,7 @@ const Soup = imports.gi.Soup;
 function LiveScore(a_params){
 
 	this.apiRoot=undefined;
+	this.icon=undefined;
 
 	this.callbacks={
 		onError:undefined,
@@ -18,6 +19,7 @@ function LiveScore(a_params){
 		//global.log("Setting apiRoot = " + a_params.apiRoot);		
 		
 		this.apiRoot = a_params.apiRoot;
+		this.icon = a_params.icon;
 		
 		if (a_params.callbacks!=undefined){
 			this.callbacks.onError=a_params.callbacks.onError;
@@ -74,15 +76,20 @@ LiveScore.prototype.parseResponse = function(response){
 
 	var sport;
 	var scorelist = [];
-	var dummyItem = {Sport: null, Score: null, Apiroot: this.apiRoot};
-	scorelist[scorelist.length] = dummyItem;
+	
+	//handling no score updates in applet.js - v1.0.1
+	
+	//var dummyItem = {Sport: null, Score: null, Apiroot: this.apiRoot};
+	//scorelist[scorelist.length] = dummyItem;
 	
 	try {
 	
 		var tempStrings = response.split("&");
 		
+		//identifying icon/sports handled in applet.js - v1.0.1
+		
 		//Identify sport			
-		switch (this.apiRoot){
+		/*switch (this.apiRoot){
 		case "http://sports.espn.go.com/nba/bottomline/scores":
 			sport = "basketball";
 			break;
@@ -124,17 +131,16 @@ LiveScore.prototype.parseResponse = function(response){
 			break;
 		default:
 			sport = "football";
-		}
+		}*/
 		
 		//Parse response to get score details
 		for (var i = 0; i < tempStrings.length; i++) {
 			
-			var temp = tempStrings[i];
-			var scoreItem = undefined;
+			var temp = tempStrings[i];			
 			
 			//eliminate scores - DELAYED, CANCELLED and FINAL
 			if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1
-			 && temp.indexOf("FINAL") == -1 && temp.indexOf("Full%2dtime") == -1){
+			 && temp.indexOf("FINAL") == -1 && temp.indexOf("Full%2dtime") == -1 && temp.indexOf("Postponed") == -1){
 						
 				var equalPos = temp.indexOf("=");
 				
@@ -151,8 +157,8 @@ LiveScore.prototype.parseResponse = function(response){
 						var status = temp.substring(startPos);
 						
 						if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){
-							var scoreItem = {Sport: sport, Score: temp, Apiroot: this.apiRoot};
-							scorelist[scorelist.length] = scoreItem;
+							//var scoreItem = {Score: temp, Apiroot: this.apiRoot, Icon: this.icon};							
+							scorelist[scorelist.length] = temp;
 						}	
 					}	
 				}
@@ -164,7 +170,7 @@ LiveScore.prototype.parseResponse = function(response){
 			global.log("sports-update@pavanred : "  + scorelist[i].Score);
 		}*/
 		
-		return scorelist;
+		return {Apiroot: this.apiRoot, Icon: this.icon, Scores: scorelist};
 		
 	} catch (e){
 		global.log("sports-update@pavanred : Error parsing score updates "  + e);
