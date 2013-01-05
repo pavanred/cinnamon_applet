@@ -10,12 +10,6 @@ const Values = {
     football_international_updates: true,
     football_europe_updates: true,
     
-    //tennis
-    //tennis_updates: true,				//Not available yet. Will be available in the future release
-    
-    //motorsports
-    //motorsports_updates: true,		//Not available yet. Will be available in the future release
-    
     //basketball
 	basketball_updates: true,  			//NBA - National Basketball Association (USA)
 	women_basketball_updates: true,  	//WNBA - Women's National Basketball Association (USA)
@@ -30,16 +24,13 @@ const Values = {
 	//ice hockey
 	icehockey_updates: true,  			//NHL - National Hockey League (USA)
 	
-	//golf
-	//golf_updates: true,				//Not available yet. Will be available in the future release
-	
 	
 	/*-----------------------------------------------------------*/
 	
 	
 	refresh_interval: 60,				// seconds
 	
-	display_cancelled: true,				// Display games that are cancelled e.g. [Ice Hockey] Toronto at Detroit (CANCELLED)
+	display_cancelled: true,			// Display games that are cancelled e.g. [Ice Hockey] Toronto at Detroit (CANCELLED)
 	
 	display_delayed: false,				// Display games that are delayed 
 	
