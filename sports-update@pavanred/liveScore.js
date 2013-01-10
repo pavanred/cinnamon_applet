@@ -10,6 +10,7 @@ function LiveScore(a_params){
 	this.displayCancelled = undefined;
 	this.displayDelayed = undefined;
 	this.displayFinal = undefined;
+	this.displaySchedule = undefined;
 
 	this.callbacks={
 		onError:undefined,
@@ -26,6 +27,7 @@ function LiveScore(a_params){
 		this.displayCancelled = a_params.displayCancelled;
 		this.displayDelayed = a_params.displayDelayed;
 		this.displayFinal = a_params.displayFinal;
+		this.displaySchedule = a_params.displaySchedule;
 		
 		if (a_params.callbacks!=undefined){
 			this.callbacks.onError=a_params.callbacks.onError;
@@ -137,6 +139,10 @@ LiveScore.prototype.parseScoreText = function(temp, status){
 					
 			if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){	
 				var item = {ScoreText: temp, Status: status}				
+				this.scorelist[this.scorelist.length] = item;
+			}
+			else if(this.displaySchedule){
+				var item = {ScoreText: temp, Status: 0}				
 				this.scorelist[this.scorelist.length] = item;
 			}	
 		}	

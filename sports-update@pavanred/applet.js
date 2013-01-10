@@ -240,7 +240,8 @@ MyApplet.prototype = {
 						'icon': sports[i].Icon,
 						'displayCancelled': AppSettings.display_cancelled,
 						'displayDelayed': AppSettings.display_delayed,
-						'displayFinal': AppSettings.display_finalscores,						
+						'displayFinal': AppSettings.display_finalscores,
+						'displaySchedule': AppSettings.display_upcoming_schedules,
 						'callbacks':{
 							'onError':function(status_code){_this._onLiveScoreError(status_code)},
 							'onScoreUpdate':function(response){_this._onScoreUpdate(response);}
