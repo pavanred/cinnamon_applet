@@ -1,13 +1,15 @@
 /*
  *
  *  Cinnamon applet - sports-update
- *  - Displays a list of all live score udpates	
+ *  Displays a list of all live score udpates, final scores, upcoming 
+ * 	schedules, cancelled and delayed games
+ * 
  *  - Live score updates available for :
+ * 		- Football (International, UK, USA and European)
  * 	  	- Basketball (NBA, WNBA, NCAA basketball)
  * 		- American football (NFL)
  * 		- Baseball (MLB)
  *      - Ice hocky (NHL)
- * 		- Football (International, UK, USA and European)
  *
  *  Author
  *	 Pavan Reddy <pavankumar.kh@gmail.com>
@@ -103,36 +105,6 @@ MyApplet.prototype = {
 			this.responseCount = 0;
 			
 			try {
-				
-				//removing code redudancies - apiroot and icons - v1.0.1
-				
-				//get configuration from settings.js				
-				/*if(AppSettings.basketball_updates)
-					sports[sports.length] = NBA_APIROOT;
-				if(AppSettings.americanfootball_updates)
-					sports[sports.length] = NFL_APIROOT;	
-				if(AppSettings.baseball_updates)
-					sports[sports.length] = MLB_APIROOT;	
-				if(AppSettings.icehockey_updates)		
-					sports[sports.length] = NHL_APIROOT;
-				if(AppSettings.women_basketball_updates)
-					sports[sports.length] = WNBA_APIROOT;	
-				if(AppSettings.NCAA_basketball)		
-					sports[sports.length] = NCAA_APIROOT;				
-				if(AppSettings.golf_updates)
-					sports[sports.length] = GOLF_APIROOT;	
-				if(AppSettings.motorsports_updates)		
-					sports[sports.length] = MOTOR_APIROOT;
-				if(AppSettings.tennis_updates)
-					sports[sports.length] = TENNIS_APIROOT;	
-				if(AppSettings.football_europe_updates)		
-					sports[sports.length] = FB_EUR_APIROOT;	
-				if(AppSettings.football_international_updates)		
-					sports[sports.length] = FB_INT_APIROOT;
-				if(AppSettings.football_uk_updates)
-					sports[sports.length] = FB_UK_APIROOT;	
-				if(AppSettings.football_usa_updates)		
-					sports[sports.length] = FB_US_APIROOT;*/
 					
 				if(AppSettings.basketball_updates){
 					var sportItem = {Apiroot: NBA_APIROOT, Icon: BASKETBALL_ICON};
@@ -199,6 +171,7 @@ MyApplet.prototype = {
 				
 				//main menu
 				this.menuManager = new PopupMenu.PopupMenuManager(this);
+				this._maincontainer = new St.BoxLayout({name: 'traycontainer', vertical: true});
 				this.menu = new MyMenu(this, orientation);
 				this.menuManager.addMenu(this.menu);
 
@@ -269,7 +242,8 @@ MyApplet.prototype = {
 						'icon': sports[i].Icon,
 						'displayCancelled': AppSettings.display_cancelled,
 						'displayDelayed': AppSettings.display_delayed,
-						'displayFinal': AppSettings.display_finalscores,						
+						'displayFinal': AppSettings.display_finalscores,
+						'displaySchedule': AppSettings.display_upcoming_schedules,
 						'callbacks':{
 							'onError':function(status_code){_this._onLiveScoreError(status_code)},
 							'onScoreUpdate':function(response){_this._onScoreUpdate(response);}
@@ -316,7 +290,7 @@ MyApplet.prototype = {
 				//DEBUG
 				//log("Unable to refresh scores");	
 				
-				this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "sports-update@pavanred : Error. Unable to refresh scores");
+				this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "Unable to refresh scores");
 				this.menu.addMenuItem(this.scoreItem);
 			} catch (e){
 				log("exception: "  + e);}
@@ -342,64 +316,6 @@ MyApplet.prototype = {
 				/*for (var i = 0; i < scorelist.length; i++) {
 					global.log("sports-update@pavanred : "  + scorelist[i]);
 				}*/
-					
-				//identifying no updates change - v1.0.1
-					
-				//if its the beginning of the sports list then clear menu and rebuild
-				/*if(scorelist[0].Apiroot == this.initCycle){			
-					this.set_applet_label("");
-					this.menu.removeAll();
-				}*/
-				
-				
-				//identifying sport icons change - v1.0.1
-		
-				//score items list - set icons
-				/*for (var i = 1; i < scorelist.length; i++) {
-					
-					var sportIcon;
-									
-					switch (scorelist[i].Sport){
-					case "basketball":
-						sportIcon = BASKETBALL_ICON;
-						break;
-					case "americanfootball":
-						sportIcon = AFOOTBALL_ICON;
-						break;
-					case "baseball":
-						sportIcon = BASEBALL_ICON;
-						break;
-					case "icehockey":
-						sportIcon = ICEHOCKEY_ICON;
-						break;
-					case "golf":
-						sportIcon = GOLF_ICON;
-						break;
-					case "football":
-						sportIcon = FOOTBALL_ICON;
-						break;
-					case "motorsport":
-						sportIcon = MOTORSPORT_ICON;
-						break;
-					case "tennis":
-						sportIcon = TENNIS_ICON;
-						break;
-					default:
-						sportIcon = FOOTBALL_ICON;
-					}
-					
-					this.set_applet_label(LIVE);
-					this._addScoreItem(scorelist[i].Score, sportIcon);
-				}
-				
-				//DEBUG
-				//log(this.menu.length);
-
-				//no updates menu item
-				if(this.menu.length <= 0 && scorelist[scorelist.length - 1].Apiroot == this.endCycle){
-					//log("no updates");
-					this._addScoreItem(NO_UPDATES, null);					
-				}*/
 				
 				if(this.menu.length <= 0){
 					this.liveScores = [];
@@ -414,13 +330,26 @@ MyApplet.prototype = {
 					this.menu.removeAll();
 					
 					if(this.liveScores.length <= 0){
+							this.set_applet_label("");
 							this._addScoreItem(NO_UPDATES, null);	
 					}
 					else{
-						this.set_applet_label(LIVE);
 						
-						for (var i = 0; i < this.liveScores.length; i++) {							
-							this._addScoreItem(this.liveScores[i].Score, this.liveScores[i].Icon);
+						var orderedScores = this.liveScores.sort(function(a,b) { 
+							  if (a.Score.Status < b.Score.Status)
+								 return -1;
+							  if (a.Score.Status > b.Score.Status)
+								return 1;
+							  return 0;
+						} );	
+						
+						for (var i = 0; i < orderedScores.length; i++) {		
+							
+							if(orderedScores[i].Score.Status == 1){
+								this.set_applet_label(LIVE);
+							}
+							
+							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon);
 						}
 					}
 					
