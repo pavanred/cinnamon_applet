@@ -3,11 +3,11 @@
  *  Cinnamon applet - sports-update
  *  - Displays a list of all live score udpates	
  *  - Live score updates available for :
+ * 		- Football (International, UK, USA and European)
  * 	  	- Basketball (NBA, WNBA, NCAA basketball)
  * 		- American football (NFL)
  * 		- Baseball (MLB)
  *      - Ice hocky (NHL)
- * 		- Football (International, UK, USA and European)
  *
  *  Author
  *	 Pavan Reddy <pavankumar.kh@gmail.com>
@@ -169,6 +169,7 @@ MyApplet.prototype = {
 				
 				//main menu
 				this.menuManager = new PopupMenu.PopupMenuManager(this);
+				this._maincontainer = new St.BoxLayout({name: 'traycontainer', vertical: true});
 				this.menu = new MyMenu(this, orientation);
 				this.menuManager.addMenu(this.menu);
 
@@ -326,6 +327,7 @@ MyApplet.prototype = {
 					this.menu.removeAll();
 					
 					if(this.liveScores.length <= 0){
+							this.set_applet_label("");
 							this._addScoreItem(NO_UPDATES, null);	
 					}
 					else{
