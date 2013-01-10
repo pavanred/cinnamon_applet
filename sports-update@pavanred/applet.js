@@ -331,7 +331,7 @@ MyApplet.prototype = {
 							this._addScoreItem(NO_UPDATES, null);	
 					}
 					else{
-						this.set_applet_label(LIVE);
+						
 						var orderedScores = this.liveScores.sort(function(a,b) { 
 							  if (a.Score.Status < b.Score.Status)
 								 return -1;
@@ -341,7 +341,11 @@ MyApplet.prototype = {
 						} );	
 						
 						for (var i = 0; i < orderedScores.length; i++) {		
-					
+							
+							if(orderedScores[i].Score.Status == 1){
+								this.set_applet_label(LIVE);
+							}
+							
 							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon);
 						}
 					}

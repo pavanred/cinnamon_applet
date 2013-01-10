@@ -93,13 +93,13 @@ LiveScore.prototype.parseResponse = function(response){
 			var temp = tempStrings[i];		
 
 			 if(temp.indexOf("_left") !== -1 && ((temp.indexOf("FINAL") !== -1 || temp.indexOf("Full%2dtime") !== -1) && this.displayFinal)){
-				this.parseScoreText(temp, 4); //FINAL
+				this.parseScoreText(temp, 2); //FINAL
 			}
 			else if(temp.indexOf("_left") !== -1 && temp.indexOf("CANCELLED") !== -1 && this.displayCancelled){
-				this.parseScoreText(temp, 3);  //CANCELLED
+				this.parseScoreText(temp, 4);  //CANCELLED
 			}
 			else if(temp.indexOf("_left") !== -1 && ((temp.indexOf("DELAYED") !== -1 || temp.indexOf("Postponed") !== -1) && this.displayDelayed)){
-				this.parseScoreText(temp, 2);  //DELAYED
+				this.parseScoreText(temp, 3);  //DELAYED
 			}
 			else if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1
 			 && temp.indexOf("FINAL") == -1 && temp.indexOf("Full%2dtime") == -1 && temp.indexOf("Postponed") == -1){
