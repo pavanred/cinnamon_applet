@@ -1,7 +1,9 @@
 /*
  *
  *  Cinnamon applet - sports-update
- *  - Displays a list of all live score udpates	
+ *  Displays a list of all live score udpates, final scores, upcoming 
+ * 	schedules, cancelled and delayed games
+ * 
  *  - Live score updates available for :
  * 		- Football (International, UK, USA and European)
  * 	  	- Basketball (NBA, WNBA, NCAA basketball)

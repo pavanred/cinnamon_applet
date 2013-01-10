@@ -142,7 +142,7 @@ LiveScore.prototype.parseScoreText = function(temp, status){
 				this.scorelist[this.scorelist.length] = item;
 			}
 			else if(this.displaySchedule){
-				var item = {ScoreText: temp, Status: 0}				
+				var item = {ScoreText: temp, Status: 5}				
 				this.scorelist[this.scorelist.length] = item;
 			}	
 		}	
