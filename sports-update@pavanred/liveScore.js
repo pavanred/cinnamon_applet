@@ -151,17 +151,17 @@ LiveScore.prototype.parseResponse = function(response){
 			 && temp.indexOf("FINAL") == -1 && temp.indexOf("Full%2dtime") == -1 && temp.indexOf("Postponed") == -1){*/
 
 			 if(temp.indexOf("_left") !== -1 && ((temp.indexOf("FINAL") !== -1 || temp.indexOf("Full%2dtime") !== -1) && this.displayFinal)){
-				this.parseScoreText(temp);
+				this.parseScoreText(temp, 4); //FINAL
 			}
 			else if(temp.indexOf("_left") !== -1 && temp.indexOf("CANCELLED") !== -1 && this.displayCancelled){
-				this.parseScoreText(temp);
+				this.parseScoreText(temp, 3);  //CANCELLED
 			}
 			else if(temp.indexOf("_left") !== -1 && ((temp.indexOf("DELAYED") !== -1 || temp.indexOf("Postponed") !== -1) && this.displayDelayed)){
-				this.parseScoreText(temp);
+				this.parseScoreText(temp, 2);  //DELAYED
 			}
 			else if(temp.indexOf("_left") !== -1 && temp.indexOf("DELAYED") == -1 && temp.indexOf("CANCELLED") == -1
 			 && temp.indexOf("FINAL") == -1 && temp.indexOf("Full%2dtime") == -1 && temp.indexOf("Postponed") == -1){
-				this.parseScoreText(temp);
+				this.parseScoreText(temp, 1); //LIVE
 			}
 		}	
 
@@ -178,7 +178,7 @@ LiveScore.prototype.parseResponse = function(response){
 	} 
 }
 
-LiveScore.prototype.parseScoreText = function(temp){
+LiveScore.prototype.parseScoreText = function(temp, status){
 	var equalPos = temp.indexOf("=");
 				
 	if(equalPos != -1){
@@ -193,8 +193,9 @@ LiveScore.prototype.parseScoreText = function(temp){
 		if(startPos != -1){
 			var status = temp.substring(startPos);
 					
-			if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){												
-				this.scorelist[this.scorelist.length] = temp;
+			if(status.indexOf("AM") == -1 && status.indexOf("PM") == -1){	
+				var item = {ScoreText: temp, Status: status}				
+				this.scorelist[this.scorelist.length] = item;
 			}	
 		}	
 	}

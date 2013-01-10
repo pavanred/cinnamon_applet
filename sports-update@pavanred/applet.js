@@ -316,7 +316,7 @@ MyApplet.prototype = {
 				//DEBUG
 				//log("Unable to refresh scores");	
 				
-				this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "sports-update@pavanred : Error. Unable to refresh scores");
+				this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "Unable to refresh scores");
 				this.menu.addMenuItem(this.scoreItem);
 			} catch (e){
 				log("exception: "  + e);}
@@ -418,9 +418,17 @@ MyApplet.prototype = {
 					}
 					else{
 						this.set_applet_label(LIVE);
+						var orderedScores = this.liveScores.sort(function(a,b) { 
+							  if (a.Score.Status < b.Score.Status)
+								 return -1;
+							  if (a.Score.Status > b.Score.Status)
+								return 1;
+							  return 0;
+						} );	
 						
-						for (var i = 0; i < this.liveScores.length; i++) {							
-							this._addScoreItem(this.liveScores[i].Score, this.liveScores[i].Icon);
+						for (var i = 0; i < orderedScores.length; i++) {		
+					
+							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon);
 						}
 					}
 					
