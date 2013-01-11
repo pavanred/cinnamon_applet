@@ -131,6 +131,7 @@ LiveScore.prototype.parseScoreText = function(temp, status){
 		temp = temp.replace("^","");
 		temp = temp.replace(/%20/g," ");
 		temp = temp.replace(/%2d/g,"-");
+		temp = temp.replace(/%3A/g,"-");
 					
 		var startPos = temp.indexOf("(");
 					

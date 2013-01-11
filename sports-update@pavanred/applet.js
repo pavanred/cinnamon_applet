@@ -64,6 +64,7 @@ const NO_UPDATES = "No live score updates";
 const SETTINGS = "Settings";
 const REFRESH = "Refresh";
 const LIVE = "LIVE";
+const REFRESH_ERROR = "Unable to refresh scores";
 
 //icons
 const FOOTBALL_ICON = "/icon-football.png";
@@ -201,12 +202,12 @@ MyApplet.prototype = {
 		},
 
 		//add a score item to the menu
-		_addScoreItem: function(updateText, icon) {
+		_addScoreItem: function(updateText, icon, detailText) {
 			
 			try{
 				let iconPath = AppletDir + icon;
 
-				this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText));
+				this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText), _(detailText));
 
 				this.menu.addMenuItem(this.scoreItem);
 			} catch (e){
@@ -289,9 +290,9 @@ MyApplet.prototype = {
 				
 				//DEBUG
 				//log("Unable to refresh scores");	
-				
-				this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "Unable to refresh scores");
-				this.menu.addMenuItem(this.scoreItem);
+
+				this._addScoreItem(REFRESH_ERROR, null, "");	
+
 			} catch (e){
 				log("exception: "  + e);}
 		},	
@@ -319,7 +320,7 @@ MyApplet.prototype = {
 				
 				if(this.menu.length <= 0){
 					this.liveScores = [];
-					this._addScoreItem(NO_UPDATES, null);	
+					this._addScoreItem(NO_UPDATES, null, "");	
 				}
 				
 				this.responseCount = this.responseCount + 1;
@@ -331,7 +332,7 @@ MyApplet.prototype = {
 					
 					if(this.liveScores.length <= 0){
 							this.set_applet_label("");
-							this._addScoreItem(NO_UPDATES, null);	
+							this._addScoreItem(NO_UPDATES, null, "");	
 					}
 					else{
 						
@@ -349,7 +350,7 @@ MyApplet.prototype = {
 								this.set_applet_label(LIVE);
 							}
 							
-							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon);
+							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon, "");
 						}
 					}
 					
@@ -395,23 +396,35 @@ function MyPopupMenuItem(){
 
 MyPopupMenuItem.prototype = {
 		__proto__: PopupMenu.PopupBaseMenuItem.prototype,
-		_init: function(iconPath, text, params)
+		_init: function(iconPath, text, details, params)
 		{
 			PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
-
-			this.imageWidget = new St.Bin({x_align: St.Align.MIDDLE});  
-
-			let layout = new Clutter.BinLayout();
-            let box = new Clutter.Box();
-            let clutter = new Clutter.Texture({keep_aspect_ratio: true, filter_quality: 2, filename: iconPath});
-            box.set_layout_manager(layout);            
-            box.add_actor(clutter);
-
-            this.imageWidget.set_child(box);
-			this.addActor(this.imageWidget);    
-
-			this.label = new St.Label({ text: text });
-			this.addActor(this.label);
+			
+			let scorebox = new St.BoxLayout();
+			
+			let image = new St.Bin({x_align: St.Align.MIDDLE});			
+			let _layout = new Clutter.BinLayout();
+            let _box = new Clutter.Box();
+            let _clutter = new Clutter.Texture({keep_aspect_ratio: true, filter_quality: 2, filename: iconPath});
+            _box.set_layout_manager(_layout);            
+            _box.add_actor(_clutter);
+            image.set_child(_box);			
+			
+			let textbox = new St.BoxLayout({vertical:true});
+			
+			let scoretext = new St.Label({ text: text});
+			scoretext.add_style_class_name('window-sticky');
+			let scoredetails = new St.Label({text: details});
+			scoretext.add_style_class_name('popup-subtitle-menu-item');
+			
+			textbox.add(scoretext);
+			textbox.add(scoredetails);
+			
+			scorebox.add(image);	
+					
+			this.addActor(scorebox);
+			this.addActor(textbox);
+			
 		}
 };
 
