@@ -214,6 +214,18 @@ MyApplet.prototype = {
 				log("exception: "  + e);}
 		},
 		
+		_addHeaderItem: function(text) {
+			
+			try{
+				
+				this.headerItem = new PopupHeaderMenuItem(_(text));
+				this.menu.addMenuItem(this.headerItem);
+				
+			} catch (e){
+				log("exception: "  + e);}
+			
+		},
+		
 		//get score updates for all sports
 		_getScores: function(){
 			
@@ -386,6 +398,28 @@ MyMenu.prototype = {
 			this.actor.hide();
 		}
 };
+
+/*------------------------
+ * Header Menu Item - Text
+ * ------------------------*/
+ 
+ function PopupHeaderMenuItem(){
+	this._init.apply(this, arguments);
+}
+
+PopupHeaderMenuItem.prototype = {
+		__proto__: PopupMenu.PopupBaseMenuItem.prototype,
+		_init: function(text, params)
+		{
+			PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
+			
+			let header = new St.Label({ text: text});
+			header.add_style_class_name('window-sticky');
+			
+			this.addActor(header);
+		}
+};
+
 
 /*------------------------
  * Menu Item - Icon + Text
