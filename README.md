@@ -3,6 +3,7 @@
 
 sports-update is a simple applet for <a href="http://cinnamon.linuxmint.com/">Cinnamon</a> desktop. This applet displays the live score updates of sporting events across the world. This applet provides live score updates  for-
 
+* Football (International, UK, Europe, USA)
 * Basketball (NBA)
 * Basketball (WNBA)
 * Basketball (NCAA)
@@ -12,9 +13,13 @@ sports-update is a simple applet for <a href="http://cinnamon.linuxmint.com/">Ci
 
 ###Installation
 
-copy the folder sports-update@pavanred/ to ~/.local/share/cinnamon/applets/
+1. copy the folder sports-update@pavanred/ to ~/.local/share/cinnamon/applets/
 
-cp -a sports-update@pavanred/ ~/.local/share/cinnamon/applets/
+	cp -a sports-update@pavanred/ ~/.local/share/cinnamon/applets/
+
+2. Restart cinnamon - Press Alt+F2, type 'r' and enter
+
+3. Enable the applet in cinnamon settings.
 
 ###Usage
 
@@ -26,7 +31,7 @@ This script was tested on Cinnamon 1.6.7 on Linux Mint 14 (Nadia)
 
 ###Todo
 
-* Add more sports Football, Cricket, Formula 1. And, more sports if reliable sources are found.
+* Add more sports if reliable sources are found.
 * Add short details for score updates. For e.g. Top scorers.
 * Provide a GUI for applet settings using <a href="http://www.pygtk.org/">PyGTK</a>
 
