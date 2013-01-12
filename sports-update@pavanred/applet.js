@@ -202,14 +202,21 @@ MyApplet.prototype = {
 		},
 
 		//add a score item to the menu
-		_addScoreItem: function(updateText, icon, detailText) {
+		_addScoreItem: function(updateText, icon, arrDetailText, url) {
 			
 			try{
+				
 				let iconPath = AppletDir + icon;
 
-				this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText), _(detailText));
+				this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText), arrDetailText);
 
 				this.menu.addMenuItem(this.scoreItem);
+				
+				this.scoreItem.connect('activate', Lang.bind(this, function () {
+					 Main.Util.spawnCommandLine("xdg-open " + url);
+					 return true;
+				}));
+				
 			} catch (e){
 				log("exception: "  + e);}
 		},
@@ -303,7 +310,7 @@ MyApplet.prototype = {
 				//DEBUG
 				//log("Unable to refresh scores");	
 
-				this._addScoreItem(REFRESH_ERROR, null, "");	
+				this._addScoreItem(REFRESH_ERROR, null, [], "");	
 
 			} catch (e){
 				log("exception: "  + e);}
@@ -332,7 +339,7 @@ MyApplet.prototype = {
 				
 				if(this.menu.length <= 0){
 					this.liveScores = [];
-					this._addScoreItem(NO_UPDATES, null, "");	
+					this._addScoreItem(NO_UPDATES, null, [], "");	
 				}
 				
 				this.responseCount = this.responseCount + 1;
@@ -344,7 +351,7 @@ MyApplet.prototype = {
 					
 					if(this.liveScores.length <= 0){
 							this.set_applet_label("");
-							this._addScoreItem(NO_UPDATES, null, "");	
+							this._addScoreItem(NO_UPDATES, null, [], "");	
 					}
 					else{
 						
@@ -362,7 +369,7 @@ MyApplet.prototype = {
 								this.set_applet_label(LIVE);
 							}
 							
-							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon, "");
+							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon, "", "");
 						}
 					}
 					
@@ -430,7 +437,7 @@ function MyPopupMenuItem(){
 
 MyPopupMenuItem.prototype = {
 		__proto__: PopupMenu.PopupBaseMenuItem.prototype,
-		_init: function(iconPath, text, details, params)
+		_init: function(iconPath, text, arrdetails, params)
 		{
 			PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
 			
@@ -448,13 +455,15 @@ MyPopupMenuItem.prototype = {
 			
 			let scoretext = new St.Label({ text: text});
 			scoretext.add_style_class_name('window-sticky');
-			let scoredetails = new St.Label({text: details});
-			scoretext.add_style_class_name('popup-subtitle-menu-item');
+			textbox.add(scoretext);		
 			
-			textbox.add(scoretext);
-			textbox.add(scoredetails);
+			for (var i = 0; i < 3; i++) {
+				let scoredetails = new St.Label({text: 'test'});
+				scoretext.add_style_class_name('popup-subtitle-menu-item');
+				textbox.add(scoredetails);
+			}
 			
-			scorebox.add(image);	
+			scorebox.add(image);
 					
 			this.addActor(scorebox);
 			this.addActor(textbox);
