@@ -67,14 +67,14 @@ const LIVE = "LIVE";
 const REFRESH_ERROR = "Unable to refresh scores";
 
 //icons
-const FOOTBALL_ICON = "/icon-football.png";
-const BASKETBALL_ICON = "/icon-basketball.png";
-const AFOOTBALL_ICON = "/icon-americanfootball.png";
-const BASEBALL_ICON = "/icon-baseball.png";
-const ICEHOCKEY_ICON = "/icon-icehockey.png";
-const GOLF_ICON = "/icon-golf.png";
-const TENNIS_ICON = "/icon-tennis.png";
-const MOTORSPORT_ICON = "/icon-racing.png";
+const FOOTBALL_ICON = "/images/icon-football.png";
+const BASKETBALL_ICON = "/images/icon-basketball.png";
+const AFOOTBALL_ICON = "/images/icon-americanfootball.png";
+const BASEBALL_ICON = "/images/icon-baseball.png";
+const ICEHOCKEY_ICON = "/images/icon-icehockey.png";
+const GOLF_ICON = "/images/icon-golf.png";
+const TENNIS_ICON = "/images/icon-tennis.png";
+const MOTORSPORT_ICON = "/images/icon-racing.png";
 
 
 //score update urls
@@ -148,9 +148,8 @@ MyApplet.prototype = {
 					sports[sports.length] = sportItem;		
 				}
 
-				//in a future release 
-				/*if(AppSettings.golf_updates){
-					var sportItem = {Apiroot: GOLF_APIROOT, Icon: GOLF_APIROOT};
+				if(AppSettings.golf_updates){
+					var sportItem = {Apiroot: GOLF_APIROOT, Icon: GOLF_ICON};
 					sports[sports.length] = sportItem;	
 				}
 				if(AppSettings.motorsports_updates){
@@ -160,8 +159,7 @@ MyApplet.prototype = {
 				if(AppSettings.tennis_updates){
 					var sportItem = {Apiroot: TENNIS_APIROOT, Icon: MOTORSPORT_ICON};
 					sports[sports.length] = sportItem;	
-				}*/
-				
+				}
 					
 				this.refreshInterval = parseInt(AppSettings.refresh_interval);
 	
@@ -274,16 +272,11 @@ MyApplet.prototype = {
 						this._onSetupError(); 
 						return;
 					}
-					
-					//DEBUG
-					//log("loading scores");		
 
 					this.ls.loadScores();	
 				}
 				
 				Mainloop.timeout_add_seconds(this.refreshInterval, Lang.bind(this, function() {
-					//DEBUG
-					//log("next iteration...");
 					
 					this._getScores();
 				}));
@@ -306,9 +299,6 @@ MyApplet.prototype = {
 		_onSetupError: function() {
 			try{
 				this.set_applet_tooltip(_("Unable to refresh scores"));
-				
-				//DEBUG
-				//log("Unable to refresh scores");	
 
 				this._addScoreItem(REFRESH_ERROR, null, [], "");	
 
@@ -317,10 +307,7 @@ MyApplet.prototype = {
 		},	
 			
 		_onLiveScoreError: function() {
-			
-			//DEBUG
-			//log("status code: " + status_code);		
-				
+
 			this.onSetupError();
 		},	
 			
