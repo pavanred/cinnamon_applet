@@ -2,5 +2,6 @@
 "uuid": "sports-update@pavanred",
 "name": "sports-update",
 "description": "Live score updates",
-"version": "1.0.3"
+"icon": "icon-football",
+"version": "1.0.5"
 }

@@ -6,10 +6,13 @@
  * 
  *  - Live score updates available for :
  * 		- Football (International, UK, USA and European)
+ * 		- Tennis
+ * 		- Motorsports
+ * 		- Golf
  * 	  	- Basketball (NBA, WNBA, NCAA basketball)
  * 		- American football (NFL)
  * 		- Baseball (MLB)
- *      - Ice hocky (NHL)
+ *      - Ice hockey (NHL)
  *
  *  Author
  *	 Pavan Reddy <pavankumar.kh@gmail.com>
@@ -64,16 +67,17 @@ const NO_UPDATES = "No live score updates";
 const SETTINGS = "Settings";
 const REFRESH = "Refresh";
 const LIVE = "LIVE";
+const REFRESH_ERROR = "Unable to refresh scores";
 
 //icons
-const FOOTBALL_ICON = "/icon-football.png";
-const BASKETBALL_ICON = "/icon-basketball.png";
-const AFOOTBALL_ICON = "/icon-americanfootball.png";
-const BASEBALL_ICON = "/icon-baseball.png";
-const ICEHOCKEY_ICON = "/icon-icehockey.png";
-const GOLF_ICON = "/icon-golf.png";
-const TENNIS_ICON = "/icon-tennis.png";
-const MOTORSPORT_ICON = "/icon-racing.png";
+const FOOTBALL_ICON = "/images/icon-football.png";
+const BASKETBALL_ICON = "/images/icon-basketball.png";
+const AFOOTBALL_ICON = "/images/icon-americanfootball.png";
+const BASEBALL_ICON = "/images/icon-baseball.png";
+const ICEHOCKEY_ICON = "/images/icon-icehockey.png";
+const GOLF_ICON = "/images/icon-golf.png";
+const TENNIS_ICON = "/images/icon-tennis.png";
+const MOTORSPORT_ICON = "/images/icon-racing.png";
 
 
 //score update urls
@@ -147,9 +151,8 @@ MyApplet.prototype = {
 					sports[sports.length] = sportItem;		
 				}
 
-				//in a future release 
-				/*if(AppSettings.golf_updates){
-					var sportItem = {Apiroot: GOLF_APIROOT, Icon: GOLF_APIROOT};
+				if(AppSettings.golf_updates){
+					var sportItem = {Apiroot: GOLF_APIROOT, Icon: GOLF_ICON};
 					sports[sports.length] = sportItem;	
 				}
 				if(AppSettings.motorsports_updates){
@@ -159,8 +162,7 @@ MyApplet.prototype = {
 				if(AppSettings.tennis_updates){
 					var sportItem = {Apiroot: TENNIS_APIROOT, Icon: MOTORSPORT_ICON};
 					sports[sports.length] = sportItem;	
-				}*/
-				
+				}
 					
 				this.refreshInterval = parseInt(AppSettings.refresh_interval);
 	
@@ -171,7 +173,6 @@ MyApplet.prototype = {
 				
 				//main menu
 				this.menuManager = new PopupMenu.PopupMenuManager(this);
-				this._maincontainer = new St.BoxLayout({name: 'traycontainer', vertical: true});
 				this.menu = new MyMenu(this, orientation);
 				this.menuManager.addMenu(this.menu);
 
@@ -201,16 +202,35 @@ MyApplet.prototype = {
 		},
 
 		//add a score item to the menu
-		_addScoreItem: function(updateText, icon) {
+		_addScoreItem: function(updateText, icon, arrDetailText, url) {
 			
 			try{
+				
 				let iconPath = AppletDir + icon;
 
-				this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText));
+				this.scoreItem = new MyPopupMenuItem(iconPath, _(updateText), arrDetailText);
 
 				this.menu.addMenuItem(this.scoreItem);
+				
+				this.scoreItem.connect('activate', Lang.bind(this, function () {
+					 Main.Util.spawnCommandLine("xdg-open " + url);
+					 return true;
+				}));
+				
 			} catch (e){
 				log("exception: "  + e);}
+		},
+		
+		_addHeaderItem: function(text) {
+			
+			try{
+				
+				this.headerItem = new PopupHeaderMenuItem(_(text));
+				this.menu.addMenuItem(this.headerItem);
+				
+			} catch (e){
+				log("exception: "  + e);}
+			
 		},
 		
 		//get score updates for all sports
@@ -254,16 +274,11 @@ MyApplet.prototype = {
 						this._onSetupError(); 
 						return;
 					}
-					
-					//DEBUG
-					//log("loading scores");		
 
 					this.ls.loadScores();	
 				}
 				
 				Mainloop.timeout_add_seconds(this.refreshInterval, Lang.bind(this, function() {
-					//DEBUG
-					//log("next iteration...");
 					
 					this._getScores();
 				}));
@@ -286,40 +301,25 @@ MyApplet.prototype = {
 		_onSetupError: function() {
 			try{
 				this.set_applet_tooltip(_("Unable to refresh scores"));
-				
-				//DEBUG
-				//log("Unable to refresh scores");	
-				
-				this.scoreItem = new MyPopupMenuItem(AppletDir + FOOTBALL_ICON, "Unable to refresh scores");
-				this.menu.addMenuItem(this.scoreItem);
+
+				this._addScoreItem(REFRESH_ERROR, null, [], "");	
+
 			} catch (e){
 				log("exception: "  + e);}
 		},	
 			
 		_onLiveScoreError: function() {
-			
-			//DEBUG
-			//log("status code: " + status_code);		
-				
+
 			this.onSetupError();
 		},	
 			
 		_onScoreUpdate: function(response) {
-						
+				
 			try{
-				
-				var apiRoot = response.Apiroot;
-				var icon = response.Icon;
-				var scorelist = response.Scores;
-				
-				//DEBUG		
-				/*for (var i = 0; i < scorelist.length; i++) {
-					global.log("sports-update@pavanred : "  + scorelist[i]);
-				}*/
-				
+
 				if(this.menu.length <= 0){
 					this.liveScores = [];
-					this._addScoreItem(NO_UPDATES, null);	
+					this._addScoreItem(NO_UPDATES, null, [], "");	
 				}
 				
 				this.responseCount = this.responseCount + 1;
@@ -331,35 +331,33 @@ MyApplet.prototype = {
 					
 					if(this.liveScores.length <= 0){
 							this.set_applet_label("");
-							this._addScoreItem(NO_UPDATES, null);	
+							this._addScoreItem(NO_UPDATES, null, [], "");	
 					}
 					else{
 						
 						var orderedScores = this.liveScores.sort(function(a,b) { 
-							  if (a.Score.Status < b.Score.Status)
+							  if (a.Type < b.Type)
 								 return -1;
-							  if (a.Score.Status > b.Score.Status)
+							  if (a.Type > b.Type)
 								return 1;
 							  return 0;
 						} );	
 						
 						for (var i = 0; i < orderedScores.length; i++) {		
 							
-							if(orderedScores[i].Score.Status == 1){
+							if(orderedScores[i].Type == 1){
 								this.set_applet_label(LIVE);
 							}
-							
-							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon);
+
+							this._addScoreItem(orderedScores[i].Summary, orderedScores[i].Icon, 
+									orderedScores[i].Details, orderedScores[i].Url);
 						}
 					}
 					
 					this.liveScores = [];
 				}
-				else{
-					
-					for (var i = 0; i < scorelist.length; i++) {							
-						this.liveScores[this.liveScores.length] = {Score: scorelist[i],Icon: icon};
-					}					
+				else{							
+					this.liveScores = this.liveScores.concat(response);			
 				}
 			
 			} catch (e){
@@ -387,6 +385,28 @@ MyMenu.prototype = {
 };
 
 /*------------------------
+ * Header Menu Item - Text
+ * ------------------------*/
+ 
+ function PopupHeaderMenuItem(){
+	this._init.apply(this, arguments);
+}
+
+PopupHeaderMenuItem.prototype = {
+		__proto__: PopupMenu.PopupBaseMenuItem.prototype,
+		_init: function(text, params)
+		{
+			PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
+			
+			let header = new St.Label({ text: text});
+			header.add_style_class_name('window-sticky');
+			
+			this.addActor(header);
+		}
+};
+
+
+/*------------------------
  * Menu Item - Icon + Text
  * ------------------------*/
 function MyPopupMenuItem(){
@@ -395,23 +415,36 @@ function MyPopupMenuItem(){
 
 MyPopupMenuItem.prototype = {
 		__proto__: PopupMenu.PopupBaseMenuItem.prototype,
-		_init: function(iconPath, text, params)
+		_init: function(iconPath, text, arrdetails, params)
 		{
 			PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
-
-			this.imageWidget = new St.Bin({x_align: St.Align.MIDDLE});  
-
-			let layout = new Clutter.BinLayout();
-            let box = new Clutter.Box();
-            let clutter = new Clutter.Texture({keep_aspect_ratio: true, filter_quality: 2, filename: iconPath});
-            box.set_layout_manager(layout);            
-            box.add_actor(clutter);
-
-            this.imageWidget.set_child(box);
-			this.addActor(this.imageWidget);    
-
-			this.label = new St.Label({ text: text });
-			this.addActor(this.label);
+			
+			let scorebox = new St.BoxLayout();
+			
+			let image = new St.Bin({x_align: St.Align.MIDDLE});			
+			let _layout = new Clutter.BinLayout();
+            let _box = new Clutter.Box();
+            let _clutter = new Clutter.Texture({keep_aspect_ratio: true, filter_quality: 2, filename: iconPath});
+            _box.set_layout_manager(_layout);            
+            _box.add_actor(_clutter);
+            image.set_child(_box);			
+			
+			let textbox = new St.BoxLayout({vertical:true});
+			
+			let scoretext = new St.Label({ text: text});
+			scoretext.add_style_class_name('window-sticky');
+			textbox.add(scoretext);		
+			
+			for (var i = 0; i < arrdetails.length; i++) {
+				let scoredetails = new St.Label({text: arrdetails[i]});
+				scoretext.add_style_class_name('popup-subtitle-menu-item');
+				textbox.add(scoredetails);
+			}
+		
+			scorebox.add(image);
+					
+			this.addActor(scorebox);
+			this.addActor(textbox);
 		}
 };
 
