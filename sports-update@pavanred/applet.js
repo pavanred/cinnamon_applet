@@ -173,7 +173,6 @@ MyApplet.prototype = {
 				
 				//main menu
 				this.menuManager = new PopupMenu.PopupMenuManager(this);
-				this._maincontainer = new St.BoxLayout({name: 'traycontainer', vertical: true});
 				this.menu = new MyMenu(this, orientation);
 				this.menuManager.addMenu(this.menu);
 
