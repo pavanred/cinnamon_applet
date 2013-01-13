@@ -6,10 +6,13 @@
  * 
  *  - Live score updates available for :
  * 		- Football (International, UK, USA and European)
+ * 		- Tennis
+ * 		- Motorsports
+ * 		- Golf
  * 	  	- Basketball (NBA, WNBA, NCAA basketball)
  * 		- American football (NFL)
  * 		- Baseball (MLB)
- *      - Ice hocky (NHL)
+ *      - Ice hockey (NHL)
  *
  *  Author
  *	 Pavan Reddy <pavankumar.kh@gmail.com>
@@ -438,12 +441,11 @@ MyPopupMenuItem.prototype = {
 				scoretext.add_style_class_name('popup-subtitle-menu-item');
 				textbox.add(scoredetails);
 			}
-			
+		
 			scorebox.add(image);
 					
 			this.addActor(scorebox);
 			this.addActor(textbox);
-			
 		}
 };
 
