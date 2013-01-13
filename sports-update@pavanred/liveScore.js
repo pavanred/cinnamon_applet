@@ -68,7 +68,7 @@ LiveScore.prototype.onHandleResponse = function(session, message) {
 	}
 	
 	var response = this.parseResponse(message.response_body.data);
-	
+
 	try {
 		if (this.callbacks.onScoreUpdate != undefined){			
 			this.callbacks.onScoreUpdate(response);
@@ -81,6 +81,95 @@ LiveScore.prototype.onHandleResponse = function(session, message) {
 }
 
 LiveScore.prototype.parseResponse = function(response){
+	
+	try {
+			var splits = response.split("&");
+	
+			var count = 1;
+			var leftText = "_left";
+			var rightText = "_right";
+			var urlText = "_url";
+			
+			var scorelist = [];
+			
+			while(response.indexOf(leftText + count) !== -1){
+				count = count + 1;		
+			}
+			
+			global.log(this.apiRoot + " - " + count);
+			
+			for(var i = 1; i < count; i++){	
+				
+				var summary = "";
+				var type = 1;
+				var url = "";
+				var details = [];
+				
+				for(var j = 0; j < splits.length; j++){
+			
+					if(splits[j].indexOf(leftText + i) !== -1){
+						
+						var tempSummary = splits[j];
+						
+						var equalpos = tempSummary.indexOf("=");
+						tempSummary = tempSummary.substring(equalpos + 1);
+						tempSummary = tempSummary.replace("^","");
+						summary = decodeURIComponent(tempSummary);
+						
+						if(summary.indexOf("FINAL") !== -1 || summary.indexOf("Full-time") !== -1){
+							type = 2;
+							//summary = summary.replace("(FINAL)","");
+							//summary = summary.replace("(Full-time)","");
+						}
+						else if(summary.indexOf("CANCELLED") !== -1){
+							type = 4;
+							//summary = summary.replace("(CANCELLED)","");
+							
+						}
+						else if(summary.indexOf("DELAYED") !== -1 || summary.indexOf("Postponed") !== -1){
+							type = 3;
+							//summary = summary.replace("(Postponed)","");
+							//summary = summary.replace("(DELAYED)","");
+						}
+						else if(summary.indexOf("AM") !== -1 || summary.indexOf("PM") !== -1)
+							type = 5;
+					}	
+					
+					if(splits[j].indexOf(urlText + i)  !== -1 ){
+						
+						var tempUrl = splits[j];
+						
+						var equalpos = tempUrl.indexOf("=");
+						tempUrl = tempUrl.substring(equalpos + 1);
+						tempUrl = tempUrl.replace("^","");
+						url = decodeURIComponent(tempUrl);
+					}
+	
+					if(splits[j].indexOf(rightText + i) !== -1 && splits[j].indexOf("_count=") == -1){
+						
+						var tempDetails = splits[j];
+						
+						var equalpos = tempDetails.indexOf("=");
+						tempDetails = tempDetails.substring(equalpos + 1);
+						tempDetails = tempDetails.replace("^","");
+						tempDetails = decodeURIComponent(tempDetails);
+						details[details.length] = tempDetails;
+					}					
+				}
+				
+				scorelist[scorelist.length] = 
+					{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+			}
+			
+			return scorelist;
+						
+		} catch (e){
+		global.log("sports-update@pavanred : Error parsing score updates "  + e);
+		return scorelist;
+	} 
+}
+
+LiveScore.prototype.parseResponse_old = function(response){
 
 	var sport;
 	this.scorelist = [];

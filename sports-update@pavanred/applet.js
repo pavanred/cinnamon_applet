@@ -325,18 +325,9 @@ MyApplet.prototype = {
 		},	
 			
 		_onScoreUpdate: function(response) {
-						
+				
 			try{
-				
-				var apiRoot = response.Apiroot;
-				var icon = response.Icon;
-				var scorelist = response.Scores;
-				
-				//DEBUG		
-				/*for (var i = 0; i < scorelist.length; i++) {
-					global.log("sports-update@pavanred : "  + scorelist[i]);
-				}*/
-				
+
 				if(this.menu.length <= 0){
 					this.liveScores = [];
 					this._addScoreItem(NO_UPDATES, null, [], "");	
@@ -356,30 +347,28 @@ MyApplet.prototype = {
 					else{
 						
 						var orderedScores = this.liveScores.sort(function(a,b) { 
-							  if (a.Score.Status < b.Score.Status)
+							  if (a.Type < b.Type)
 								 return -1;
-							  if (a.Score.Status > b.Score.Status)
+							  if (a.Type > b.Type)
 								return 1;
 							  return 0;
 						} );	
 						
 						for (var i = 0; i < orderedScores.length; i++) {		
 							
-							if(orderedScores[i].Score.Status == 1){
+							if(orderedScores[i].Type == 1){
 								this.set_applet_label(LIVE);
 							}
-							
-							this._addScoreItem(orderedScores[i].Score.ScoreText, this.liveScores[i].Icon, "", "");
+
+							this._addScoreItem(orderedScores[i].Summary, orderedScores[i].Icon, 
+									orderedScores[i].Details, orderedScores[i].Url);
 						}
 					}
 					
 					this.liveScores = [];
 				}
-				else{
-					
-					for (var i = 0; i < scorelist.length; i++) {							
-						this.liveScores[this.liveScores.length] = {Score: scorelist[i],Icon: icon};
-					}					
+				else{							
+					this.liveScores = this.liveScores.concat(response);			
 				}
 			
 			} catch (e){
@@ -457,8 +446,8 @@ MyPopupMenuItem.prototype = {
 			scoretext.add_style_class_name('window-sticky');
 			textbox.add(scoretext);		
 			
-			for (var i = 0; i < 3; i++) {
-				let scoredetails = new St.Label({text: 'test'});
+			for (var i = 0; i < arrdetails.length; i++) {
+				let scoredetails = new St.Label({text: arrdetails[i]});
 				scoretext.add_style_class_name('popup-subtitle-menu-item');
 				textbox.add(scoredetails);
 			}
