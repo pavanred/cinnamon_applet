@@ -151,8 +151,24 @@ LiveScore.prototype.parseResponse = function(response){
 					}					
 				}
 				
-				scorelist[scorelist.length] = 
-					{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				if((summary.indexOf("FINAL") !== -1 || summary.indexOf("Full-time") !== -1) && this.displayFinal){				
+					scorelist[scorelist.length] = 
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
+				else if(summary.indexOf("CANCELLED") !== -1 && this.displayCancelled){
+					scorelist[scorelist.length] = 
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
+				else if((summary.indexOf("DELAYED") !== -1 || summary.indexOf("Postponed") !== -1) && this.displayDelayed){
+					scorelist[scorelist.length] = 
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
+				else if(summary.indexOf("DELAYED") == -1 && summary.indexOf("CANCELLED") == -1 
+					&& summary.indexOf("FINAL") == -1 && summary.indexOf("Full-time") == -1 && summary.indexOf("Postponed") == -1){
+					
+					scorelist[scorelist.length] = 
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
 			}
 			
 			return scorelist;
