@@ -5,6 +5,11 @@ imports.searchPath.push( imports.ui.appletManager.appletMeta["sports-update@pava
 
 const Soup = imports.gi.Soup;
 const Json = imports.json_parse;
+const InternationalTeams = new Array("Australia","India","England","Pakistan","South Africa","New Zealand",
+		"Sri Lanka","West Indies","Zimbabwe","Bangladesh","Kenya","Ireland","Canada","Netherlands",
+		"Scotland","Afghanistan","USA");
+const IPLTeams = new Array("Chennai Super Kings","Delhi Daredevils","Kings XI Punjab","Kolkata Knight Riders",
+		"Mumbai Indians","Rajasthan Royals","Royal Challengers Bangalore","Sunrisers Hyderabad");
 
 function LiveScore(a_params){
 
@@ -86,19 +91,24 @@ LiveScore.prototype.parseResponse = function(response){
 	var scorelist = [];
 	
 	try {
-		
-		if(this.sport == "cricket"){
-			
-			var criScores = parseCricketResponse(response);
+		if(this.sport == "cricket_international" || this.sport == "cricket_ipl" || this.sport == "cricket"){
+
+			var criScores = parseCricketResponse(response, this.sport);
 			
 			for(var j = 0; j < criScores.length; j++){
 			
+				var cricType = 1;
+				
+				if(criScores[j].Details[0].indexOf("Match over") !== -1){
+					cricType = 2;
+				}
+				
 				scorelist[scorelist.length] = 
 				{
 						Summary: criScores[j].Summary, 
-						Type: 1,	//only live information for cricket 
+						Type: cricType,	
 						Details: criScores[j].Details, 
-						Url: "http://www.espncricinfo.com/dummy/content/current/story/" + criScores[j].Id + ".html", 	//no url information for cricket
+						Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	//no url information for cricket
 						Icon: this.icon
 				};
 			}
@@ -257,14 +267,26 @@ LiveScore.prototype.parseResponse = function(response){
 	}	 
 }
 
-function parseCricketResponse(response){
+function parseCricketResponse(response, sport){
 	try{		
 		var games = Json.json_parse(response, null);
+
 		var matchIds = [];
 		
 		for(var i=0; i < games.length; i++){
-			//global.log(games[i].id);
-			matchIds[matchIds.length] = games[i].id;
+			
+			if(sport == "cricket_international" && isInternational(games[i].t1,games[i].t2)){
+				matchIds[matchIds.length] = games[i].id;
+				continue;
+			}
+			if(sport == "cricket_ipl" && isIPL(games[i].t1,games[i].t2)){
+				matchIds[matchIds.length] = games[i].id;				
+				continue;
+			}
+			if(sport == "cricket"){
+				matchIds[matchIds.length] = games[i].id;
+				continue;
+			}
 		}
 		
 		return getCricketScoreDetails(matchIds);
@@ -311,5 +333,43 @@ function getCricketScoreDetails(matchIds){
 	catch (e){
 		global.log("sports-update@pavanred : Error fetching cricket updates "  + e);
 		return [];
+	}	
+}
+
+function isInternational(team1,team2){
+	var international = false;
+	try{	
+		for(var i = 0; i < InternationalTeams.length; i++){
+			
+			if(team1 == InternationalTeams[i] || team2 == InternationalTeams[i]){
+				international = true;
+				break;
+			}
+		}
+		
+		return international;
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);
+		return international;
+	}	
+}
+
+function isIPL(team1,team2){
+	try{	
+		var ipl = false;
+		for(var i = 0; i < ipl.length; i++){
+				
+			if(team1 == ipl[i] || team2 == ipl[i]){
+				ipl = true;
+				break;
+			}
+		}
+			
+		return ipl;
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);
+		return ipl;
 	}	
 }

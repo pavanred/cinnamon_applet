@@ -5,7 +5,9 @@ const Values = {
     //true or false
     
 	//cricket
-	cricket_updates:true,
+	cricket_international_updates:true,		
+	cricket_india_updates:true,			//Indian Premier League
+	cricket_all_updates:true,			//worldwide international, first class, county, 20-20 men and women
 		
     //football
     football_usa_updates: true,

@@ -164,7 +164,15 @@ MyApplet.prototype = {
 					var sportItem = {Apiroot: TENNIS_APIROOT, Icon: TENNIS_ICON, Sport: "tennis"};
 					sports[sports.length] = sportItem;	
 				}				
-				if(AppSettings.cricket_updates){
+				if(AppSettings.cricket_international_updates){
+					var sportItem = {Apiroot: CRICKET_APIROOT, Icon: CRICKET_ICON, Sport: "cricket_international"};
+					sports[sports.length] = sportItem;	
+				}
+				if(AppSettings.cricket_india_updates){
+					var sportItem = {Apiroot: CRICKET_APIROOT, Icon: CRICKET_ICON, Sport: "cricket_ipl"};
+					sports[sports.length] = sportItem;	
+				}
+				if(AppSettings.cricket_all_updates){
 					var sportItem = {Apiroot: CRICKET_APIROOT, Icon: CRICKET_ICON, Sport: "cricket"};
 					sports[sports.length] = sportItem;	
 				}
