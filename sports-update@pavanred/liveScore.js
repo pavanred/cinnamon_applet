@@ -1,7 +1,10 @@
 /*------------------------
  * Imports
  * ------------------------*/
+imports.searchPath.push( imports.ui.appletManager.appletMeta["sports-update@pavanred"].path );
+
 const Soup = imports.gi.Soup;
+const Json = imports.json_parse;
 
 function LiveScore(a_params){
 
@@ -86,7 +89,7 @@ LiveScore.prototype.parseResponse = function(response){
 		
 		if(this.sport == "cricket"){
 			
-			var criScores = parseCricketResponse();
+			var criScores = parseCricketResponse(response);
 			
 			for(var j = 0; j < criScores.length; j++){
 			
@@ -95,7 +98,7 @@ LiveScore.prototype.parseResponse = function(response){
 						Summary: criScores[j].Summary, 
 						Type: 1,	//only live information for cricket 
 						Details: criScores[j].Details, 
-						Url: '', 	//no url information for cricket
+						Url: "http://www.espncricinfo.com/dummy/content/current/story/" + criScores[j].Id + ".html", 	//no url information for cricket
 						Icon: this.icon
 				};
 			}
@@ -255,11 +258,58 @@ LiveScore.prototype.parseResponse = function(response){
 }
 
 function parseCricketResponse(response){
-	try{
-		//TODO json parsing
+	try{		
+		var games = Json.json_parse(response, null);
+		var matchIds = [];
+		
+		for(var i=0; i < games.length; i++){
+			//global.log(games[i].id);
+			matchIds[matchIds.length] = games[i].id;
+		}
+		
+		return getCricketScoreDetails(matchIds);
+		
 	}
 	catch (e){
 		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);
 	
+	}	
+}
+
+function getCricketScoreDetails(matchIds){
+	try{		
+		var url = "http://cricscore-api.appspot.com//csa?id=";
+		var scores = [];
+
+		for(var i = 0; i < matchIds.length; i++){
+			
+			var detail = [];
+			
+			var _httpSession = new Soup.SessionSync();			
+			var msg = Soup.Message.new('GET',url + matchIds[i]);
+			_httpSession.send_message (msg);			
+			
+			if (msg.status_code !== 200) {
+				continue;
+			}
+			
+			var matchDetails = Json.json_parse(msg.response_body.data, null);
+			
+			detail[detail.length] = matchDetails[0].de;
+			
+			scores[scores.length] =   
+			{
+					Summary: matchDetails[0].si, 				
+					Details: detail, 
+					Id: matchDetails[0].id, 	
+			};
+			
+		}
+		
+		return scores;
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error fetching cricket updates "  + e);
+		return [];
 	}	
 }
