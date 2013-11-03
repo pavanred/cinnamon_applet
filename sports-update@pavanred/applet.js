@@ -78,6 +78,7 @@ const ICEHOCKEY_ICON = "/images/icon-icehockey.png";
 const GOLF_ICON = "/images/icon-golf.png";
 const TENNIS_ICON = "/images/icon-tennis.png";
 const MOTORSPORT_ICON = "/images/icon-racing.png";
+const CRICKET_ICON = "/images/icon-cricket.png";
 
 
 //score update urls
@@ -94,6 +95,7 @@ const FB_EUR_APIROOT = "http://soccernet.espn.go.com/bottomline/scores/scores?sc
 const GOLF_APIROOT = "http://sports.espn.go.com/sports/golf/bottomLineGolfLeaderboard";
 const TENNIS_APIROOT = "http://sports.espn.go.com/sports/tennis/bottomline/scores";
 const MOTOR_APIROOT = "http://sports.espn.go.com/rpm/bottomline/race";
+const CRICKET_APIROOT = "http://cricscore-api.appspot.com/csa";
 
 function MyApplet(orientation) {
 	this._init(orientation);
@@ -111,56 +113,59 @@ MyApplet.prototype = {
 			try {
 					
 				if(AppSettings.basketball_updates){
-					var sportItem = {Apiroot: NBA_APIROOT, Icon: BASKETBALL_ICON};
+					var sportItem = {Apiroot: NBA_APIROOT, Icon: BASKETBALL_ICON, Sport: "basketball"};
 					sports[sports.length] = sportItem;
 				}
 				if(AppSettings.americanfootball_updates){
-					var sportItem = {Apiroot: NFL_APIROOT, Icon: AFOOTBALL_ICON};
+					var sportItem = {Apiroot: NFL_APIROOT, Icon: AFOOTBALL_ICON, Sport: "a_football"};
 					sports[sports.length] = sportItem;
 				}	
 				if(AppSettings.baseball_updates){
-					var sportItem = {Apiroot: MLB_APIROOT, Icon: BASEBALL_ICON};
+					var sportItem = {Apiroot: MLB_APIROOT, Icon: BASEBALL_ICON, Sport: "baseball"};
 					sports[sports.length] = sportItem;
 				}
 				if(AppSettings.icehockey_updates){		
-					var sportItem = {Apiroot: NHL_APIROOT, Icon: ICEHOCKEY_ICON};
+					var sportItem = {Apiroot: NHL_APIROOT, Icon: ICEHOCKEY_ICON, Sport: "icehockey"};
 					sports[sports.length] = sportItem;
 				}
 				if(AppSettings.women_basketball_updates){
-					var sportItem = {Apiroot: WNBA_APIROOT, Icon: BASKETBALL_ICON};
+					var sportItem = {Apiroot: WNBA_APIROOT, Icon: BASKETBALL_ICON, Sport: "basketball"};
 					sports[sports.length] = sportItem;
 				}	
 				if(AppSettings.NCAA_basketball){
-					var sportItem = {Apiroot: NCAA_APIROOT, Icon: BASKETBALL_ICON};
+					var sportItem = {Apiroot: NCAA_APIROOT, Icon: BASKETBALL_ICON, Sport: "basketball"};
 					sports[sports.length] = sportItem;			
 				}
 				if(AppSettings.football_europe_updates){		
-					var sportItem = {Apiroot: FB_EUR_APIROOT, Icon: FOOTBALL_ICON};
+					var sportItem = {Apiroot: FB_EUR_APIROOT, Icon: FOOTBALL_ICON, Sport: "football"};
 					sports[sports.length] = sportItem;		
 				}
 				if(AppSettings.football_international_updates){		
-					var sportItem = {Apiroot: FB_INT_APIROOT, Icon: FOOTBALL_ICON};
+					var sportItem = {Apiroot: FB_INT_APIROOT, Icon: FOOTBALL_ICON, Sport: "football"};
 					sports[sports.length] = sportItem;
 				}
 				if(AppSettings.football_uk_updates){
-					var sportItem = {Apiroot: FB_UK_APIROOT, Icon: FOOTBALL_ICON};
+					var sportItem = {Apiroot: FB_UK_APIROOT, Icon: FOOTBALL_ICON, Sport: "football"};
 					sports[sports.length] = sportItem;	
 				}
 				if(AppSettings.football_usa_updates){
-					var sportItem = {Apiroot: FB_US_APIROOT, Icon: FOOTBALL_ICON};
+					var sportItem = {Apiroot: FB_US_APIROOT, Icon: FOOTBALL_ICON, Sport: "football"};
 					sports[sports.length] = sportItem;		
 				}
-
 				if(AppSettings.golf_updates){
-					var sportItem = {Apiroot: GOLF_APIROOT, Icon: GOLF_ICON};
+					var sportItem = {Apiroot: GOLF_APIROOT, Icon: GOLF_ICON, Sport: "golf"};
 					sports[sports.length] = sportItem;	
 				}
 				if(AppSettings.motorsports_updates){
-					var sportItem = {Apiroot: MOTOR_APIROOT, Icon: MOTORSPORT_ICON};
+					var sportItem = {Apiroot: MOTOR_APIROOT, Icon: MOTORSPORT_ICON, Sport: "motorsports"};
 					sports[sports.length] = sportItem;	
 				}
 				if(AppSettings.tennis_updates){
-					var sportItem = {Apiroot: TENNIS_APIROOT, Icon: MOTORSPORT_ICON};
+					var sportItem = {Apiroot: TENNIS_APIROOT, Icon: TENNIS_ICON, Sport: "tennis"};
+					sports[sports.length] = sportItem;	
+				}				
+				if(AppSettings.cricket_updates){
+					var sportItem = {Apiroot: CRICKET_APIROOT, Icon: CRICKET_ICON, Sport: "cricket"};
 					sports[sports.length] = sportItem;	
 				}
 					
@@ -260,6 +265,7 @@ MyApplet.prototype = {
 						this.ls = new LiveScore.LiveScore({
 						'apiRoot': sports[i].Apiroot,
 						'icon': sports[i].Icon,
+						'sport': sports[i].Sport,
 						'displayCancelled': AppSettings.display_cancelled,
 						'displayDelayed': AppSettings.display_delayed,
 						'displayFinal': AppSettings.display_finalscores,

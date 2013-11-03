@@ -4,6 +4,9 @@ const Values = {
     //live score updates for sports
     //true or false
     
+	//cricket
+	cricket_updates:true,
+		
     //football
     football_usa_updates: true,
     football_uk_updates: true,			//Barclays Premier League
@@ -17,7 +20,7 @@ const Values = {
     motorsports_updates:true,
     
     //Golf
-    golf_updates:true,
+    golf_updates:false,
     
     //basketball
 	basketball_updates: true,  			//NBA - National Basketball Association (USA)
@@ -31,7 +34,7 @@ const Values = {
 	baseball_updates: true,  			//MLB - Major League Baseball (USA)
 	
 	//ice hockey
-	icehockey_updates: true,  			//NHL - National Hockey League (USA)
+	icehockey_updates: false,  			//NHL - National Hockey League (USA)
 	
 	
 	/*-----------------------------------------------------------*/

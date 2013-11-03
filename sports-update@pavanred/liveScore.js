@@ -11,6 +11,7 @@ function LiveScore(a_params){
 	this.displayDelayed = undefined;
 	this.displayFinal = undefined;
 	this.displaySchedule = undefined;
+	this.sport= undefined;
 
 	this.callbacks={
 		onError:undefined,
@@ -25,6 +26,7 @@ function LiveScore(a_params){
 		this.displayDelayed = a_params.displayDelayed;
 		this.displayFinal = a_params.displayFinal;
 		this.displaySchedule = a_params.displaySchedule;
+		this.sport = a_params.sport;
 		
 		if (a_params.callbacks!=undefined){
 			this.callbacks.onError=a_params.callbacks.onError;
@@ -49,6 +51,7 @@ LiveScore.prototype.initialised = function(){
 
 LiveScore.prototype.loadScores = function(){
 	var url = this.apiRoot;
+	var sport = this.sport;
 	
 	let this_ = this;
 	let message = Soup.Message.new('GET', url);	
@@ -77,15 +80,34 @@ LiveScore.prototype.onHandleResponse = function(session, message) {
 
 LiveScore.prototype.parseResponse = function(response){
 	
+	var scorelist = [];
+	
 	try {
+		
+		if(this.sport == "cricket"){
+			
+			var criScores = parseCricketResponse();
+			
+			for(var j = 0; j < criScores.length; j++){
+			
+				scorelist[scorelist.length] = 
+				{
+						Summary: criScores[j].Summary, 
+						Type: 1,	//only live information for cricket 
+						Details: criScores[j].Details, 
+						Url: '', 	//no url information for cricket
+						Icon: this.icon
+				};
+			}
+		}
+		else{
+			
 			var splits = response.split("&");
 	
 			var count = 1;
 			var leftText = "_left";
 			var rightText = "_right";
 			var urlText = "_url";
-			
-			var scorelist = [];
 			
 			while(response.indexOf(leftText + count) !== -1){
 				count = count + 1;		
@@ -222,11 +244,22 @@ LiveScore.prototype.parseResponse = function(response){
 						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
 				}
 			}
+		}
 			
-			return scorelist;
+		return scorelist;
 						
-		} catch (e){
+	} catch (e){
 		global.log("sports-update@pavanred : Error parsing score updates "  + e);
 		return scorelist;
-	} 
+	}	 
+}
+
+function parseCricketResponse(response){
+	try{
+		//TODO json parsing
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);
+	
+	}	
 }
