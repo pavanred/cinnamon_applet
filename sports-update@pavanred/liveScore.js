@@ -1,7 +1,15 @@
 /*------------------------
  * Imports
  * ------------------------*/
+imports.searchPath.push( imports.ui.appletManager.appletMeta["sports-update@pavanred"].path );
+
 const Soup = imports.gi.Soup;
+const Json = imports.json_parse;
+const InternationalTeams = new Array("Australia","India","England","Pakistan","South Africa","New Zealand",
+		"Sri Lanka","West Indies","Zimbabwe","Bangladesh","Kenya","Ireland","Canada","Netherlands",
+		"Scotland","Afghanistan","USA");
+const IPLTeams = new Array("Chennai Super Kings","Delhi Daredevils","Kings XI Punjab","Kolkata Knight Riders",
+		"Mumbai Indians","Rajasthan Royals","Royal Challengers Bangalore","Sunrisers Hyderabad");
 
 function LiveScore(a_params){
 
@@ -11,6 +19,7 @@ function LiveScore(a_params){
 	this.displayDelayed = undefined;
 	this.displayFinal = undefined;
 	this.displaySchedule = undefined;
+	this.sport= undefined;
 
 	this.callbacks={
 		onError:undefined,
@@ -25,6 +34,7 @@ function LiveScore(a_params){
 		this.displayDelayed = a_params.displayDelayed;
 		this.displayFinal = a_params.displayFinal;
 		this.displaySchedule = a_params.displaySchedule;
+		this.sport = a_params.sport;
 		
 		if (a_params.callbacks!=undefined){
 			this.callbacks.onError=a_params.callbacks.onError;
@@ -49,6 +59,7 @@ LiveScore.prototype.initialised = function(){
 
 LiveScore.prototype.loadScores = function(){
 	var url = this.apiRoot;
+	var sport = this.sport;
 	
 	let this_ = this;
 	let message = Soup.Message.new('GET', url);	
@@ -77,15 +88,65 @@ LiveScore.prototype.onHandleResponse = function(session, message) {
 
 LiveScore.prototype.parseResponse = function(response){
 	
+	var scorelist = [];
+	
 	try {
+		if(this.sport == "cricket_international" || this.sport == "cricket_ipl" || this.sport == "cricket"){
+			
+			var criScores = parseCricketResponse(response, this.sport);
+			
+			global.log("final "  + this.displayFinal);
+			global.log("schedule " + this.displaySchedule);
+			
+			
+			for(var j = 0; j < criScores.length; j++){		
+				
+				if(criScores[j].Details[0].indexOf("Match over") !== -1){					
+					
+					if(this.displayFinal){
+						scorelist[scorelist.length] = 
+						{
+								Summary: criScores[j].Summary, 
+								Type: 2,	
+								Details: criScores[j].Details, 
+								Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
+								Icon: this.icon
+						};
+					}
+				}
+				else if(criScores[j].Details[0].match(/[A-Z][a-z][a-z] \d{1,2}, \d{4}/) !== null){
+					
+					if(this.displaySchedule){
+						scorelist[scorelist.length] = 
+						{
+								Summary: criScores[j].Summary, 
+								Type: 5,	
+								Details: criScores[j].Details, 
+								Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
+								Icon: this.icon
+						};
+					}
+				}
+				else{					
+					scorelist[scorelist.length] = 
+					{
+							Summary: criScores[j].Summary, 
+							Type: 1,	
+							Details: criScores[j].Details, 
+							Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
+							Icon: this.icon
+					};
+				}
+			}
+		}
+		else{
+			
 			var splits = response.split("&");
 	
 			var count = 1;
 			var leftText = "_left";
 			var rightText = "_right";
 			var urlText = "_url";
-			
-			var scorelist = [];
 			
 			while(response.indexOf(leftText + count) !== -1){
 				count = count + 1;		
@@ -151,14 +212,190 @@ LiveScore.prototype.parseResponse = function(response){
 					}					
 				}
 				
-				scorelist[scorelist.length] = 
-					{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				var leaderboardStatus = false;
+				
+				if(details.length > 0){
+					if(details[0].indexOf("Complete") !== -1){
+						leaderboardStatus = true;
+					}
+				}
+				
+				if((summary.indexOf("FINAL") !== -1 || summary.indexOf("Full-time") !== -1 || leaderboardStatus) && this.displayFinal){				
+					scorelist[scorelist.length] = 
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
+				else if(summary.indexOf("CANCELLED") !== -1 && this.displayCancelled){
+					scorelist[scorelist.length] = 
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
+				else if((summary.indexOf("DELAYED") !== -1 || summary.indexOf("Postponed") !== -1) && this.displayDelayed){
+					scorelist[scorelist.length] = 
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
+				else if((summary.indexOf("AM") !== -1 || summary.indexOf("PM") !== -1) && this.displaySchedule){
+					
+					var tempSum = summary;
+					var bracketStart = tempSum.indexOf("(");
+					var bracketEnd = tempSum.indexOf(")");
+					var summarybit = "";
+					
+					var summarybit = summary.substring(0,bracketStart - 1);
+					
+					var time = tempSum.substring(bracketStart + 1, bracketEnd);
+					time = time.replace(" ET", "");
+					var PM = false;
+					
+					if(time.indexOf("PM") != -1){
+						PM = true;
+						time = time.replace(" PM","");
+					}
+					
+					if(time.indexOf("AM") != -1){
+						PM = false;
+						time = time.replace(" AM","");
+					}
+					
+					var separator = time.indexOf(":");
+					var hours = time.substring(0,separator);
+					var minutes = time.substring(separator + 1);
+					
+					if(PM)
+						hours = hours + 12 - 1;
+														
+					var today = new Date();
+					global.log("today" + today.toString() + "-" + today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate() + "-" + hours + "-" + minutes);
+					
+					var et = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes, 0, 0);
+
+					var final = new Date(et.toUTCString());
+
+					//summarybit = summarybit + " (" + final.getHours() + ":" + final.getMinutes() + ")";
+					summarybit = summarybit + final.toString();
+
+					scorelist[scorelist.length] = 
+						{Summary: summarybit, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
+				else if(summary.indexOf("DELAYED") == -1 && summary.indexOf("CANCELLED") == -1 
+					&& summary.indexOf("FINAL") == -1 && summary.indexOf("Full-time") == -1 && summary.indexOf("Postponed") == -1
+					&& summary.indexOf("AM") == -1 && summary.indexOf("PM") == -1){
+					
+					scorelist[scorelist.length] = 
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
+				}
 			}
+		}
 			
-			return scorelist;
+		return scorelist;
 						
-		} catch (e){
+	} catch (e){
 		global.log("sports-update@pavanred : Error parsing score updates "  + e);
 		return scorelist;
-	} 
+	}	 
+}
+
+function parseCricketResponse(response, sport){
+	try{		
+		var games = Json.json_parse(response, null);
+
+		var matchIds = [];
+		
+		for(var i=0; i < games.length; i++){
+			
+			if(sport == "cricket_international" && isInternational(games[i].t1,games[i].t2)){
+				matchIds[matchIds.length] = games[i].id;
+				continue;
+			}
+			if(sport == "cricket_ipl" && isIPL(games[i].t1,games[i].t2)){
+				matchIds[matchIds.length] = games[i].id;				
+				continue;
+			}
+			if(sport == "cricket"){
+				matchIds[matchIds.length] = games[i].id;
+				continue;
+			}
+		}
+		
+		return getCricketScoreDetails(matchIds);
+		
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);
+	
+	}	
+}
+
+function getCricketScoreDetails(matchIds){
+	try{		
+		var url = "http://cricscore-api.appspot.com//csa?id=";
+		var scores = [];
+
+		for(var i = 0; i < matchIds.length; i++){
+			
+			var detail = [];
+			
+			var _httpSession = new Soup.SessionSync();			
+			var msg = Soup.Message.new('GET',url + matchIds[i]);
+			_httpSession.send_message (msg);			
+			
+			if (msg.status_code !== 200) {
+				continue;
+			}
+			
+			var matchDetails = Json.json_parse(msg.response_body.data, null);
+			
+			detail[detail.length] = matchDetails[0].de;
+			
+			scores[scores.length] =   
+			{
+					Summary: matchDetails[0].si, 				
+					Details: detail, 
+					Id: matchDetails[0].id, 	
+			};
+			
+		}
+		
+		return scores;
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error fetching cricket updates "  + e);
+		return [];
+	}	
+}
+
+function isInternational(team1,team2){
+	var international = false;
+	try{	
+		for(var i = 0; i < InternationalTeams.length; i++){
+			
+			if(team1 == InternationalTeams[i] || team2 == InternationalTeams[i]){
+				international = true;
+				break;
+			}
+		}
+		
+		return international;
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);
+		return international;
+	}	
+}
+
+function isIPL(team1,team2){
+	try{	
+		var ipl = false;
+		for(var i = 0; i < ipl.length; i++){
+				
+			if(team1 == ipl[i] || team2 == ipl[i]){
+				ipl = true;
+				break;
+			}
+		}
+			
+		return ipl;
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);
+		return ipl;
+	}	
 }

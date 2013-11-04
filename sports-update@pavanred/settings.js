@@ -4,6 +4,11 @@ const Values = {
     //live score updates for sports
     //true or false
     
+	//cricket
+	cricket_international_updates:true,		
+	cricket_india_updates:true,			//Indian Premier League
+	cricket_all_updates:false,			//worldwide international, first class, county, college, clubs - men and women
+		
     //football
     football_usa_updates: true,
     football_uk_updates: true,			//Barclays Premier League
@@ -17,7 +22,7 @@ const Values = {
     motorsports_updates:true,
     
     //Golf
-    golf_updates:true,
+    golf_updates:false,
     
     //basketball
 	basketball_updates: true,  			//NBA - National Basketball Association (USA)
@@ -31,7 +36,7 @@ const Values = {
 	baseball_updates: true,  			//MLB - Major League Baseball (USA)
 	
 	//ice hockey
-	icehockey_updates: true,  			//NHL - National Hockey League (USA)
+	icehockey_updates: false,  			//NHL - National Hockey League (USA)
 	
 	
 	/*-----------------------------------------------------------*/
@@ -39,14 +44,14 @@ const Values = {
 	
 	refresh_interval: 60,				// seconds
 	
-	display_cancelled: true,			// Display games that are cancelled e.g. [Ice Hockey] Toronto at Detroit (CANCELLED)
+	display_cancelled: false,			// Display games that are cancelled e.g. [Ice Hockey] Toronto at Detroit (CANCELLED)
 	
-	display_delayed: true,				// Display games that are delayed 
+	display_delayed: false,				// Display games that are delayed 
 	
-	display_finalscores: true,			/* Persist the display of final scores for a while after the game is complete
+	display_finalscores: false,			/* Persist the display of final scores for a while after the game is complete
 										   (till the scores are available in the input stream)
 										   e.g Dallas 103  Washington 94 (FINAL)									*/
 										
-	display_upcoming_schedules: true,   // Display the schedule of upcoming games
+	display_upcoming_schedules: false,   // Display the schedule of upcoming games
 	
 };
