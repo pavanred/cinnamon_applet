@@ -92,25 +92,41 @@ LiveScore.prototype.parseResponse = function(response){
 	
 	try {
 		if(this.sport == "cricket_international" || this.sport == "cricket_ipl" || this.sport == "cricket"){
-
+			
 			var criScores = parseCricketResponse(response, this.sport);
 			
 			for(var j = 0; j < criScores.length; j++){
-			
-				var cricType = 1;
 				
-				if(criScores[j].Details[0].indexOf("Match over") !== -1){
-					cricType = 2;
+				if(criScores[j].Details[0].indexOf("Match over") !== -1 && this.displayFinal){
+					scorelist[scorelist.length] = 
+					{
+							Summary: criScores[j].Summary, 
+							Type: 2,	
+							Details: criScores[j].Details, 
+							Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
+							Icon: this.icon
+					};
 				}
-				
-				scorelist[scorelist.length] = 
-				{
-						Summary: criScores[j].Summary, 
-						Type: cricType,	
-						Details: criScores[j].Details, 
-						Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	//no url information for cricket
-						Icon: this.icon
-				};
+				else if(criScores[j].Details[0].match(/[A-Z][a-z][a-z] \d{1,2}, \d{4}/) !== null && this.displaySchedule){
+					scorelist[scorelist.length] = 
+					{
+							Summary: criScores[j].Summary, 
+							Type: 5,	
+							Details: criScores[j].Details, 
+							Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
+							Icon: this.icon
+					};
+				}
+				else{
+					scorelist[scorelist.length] = 
+					{
+							Summary: criScores[j].Summary, 
+							Type: 1,	
+							Details: criScores[j].Details, 
+							Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
+							Icon: this.icon
+					};
+				}
 			}
 		}
 		else{

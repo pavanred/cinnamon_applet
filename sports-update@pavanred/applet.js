@@ -5,6 +5,7 @@
  * 	schedules, cancelled and delayed games
  * 
  *  - Live score updates available for :
+ *      - Cricket
  * 		- Football (International, UK, USA and European)
  * 		- Tennis
  * 		- Motorsports
