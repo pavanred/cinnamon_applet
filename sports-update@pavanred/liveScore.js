@@ -95,10 +95,6 @@ LiveScore.prototype.parseResponse = function(response){
 			
 			var criScores = parseCricketResponse(response, this.sport);
 			
-			global.log("final "  + this.displayFinal);
-			global.log("schedule " + this.displaySchedule);
-			
-			
 			for(var j = 0; j < criScores.length; j++){		
 				
 				if(criScores[j].Details[0].indexOf("Match over") !== -1){					
