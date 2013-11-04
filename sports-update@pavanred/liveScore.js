@@ -95,29 +95,39 @@ LiveScore.prototype.parseResponse = function(response){
 			
 			var criScores = parseCricketResponse(response, this.sport);
 			
-			for(var j = 0; j < criScores.length; j++){
+			global.log("final "  + this.displayFinal);
+			global.log("schedule " + this.displaySchedule);
+			
+			
+			for(var j = 0; j < criScores.length; j++){		
 				
-				if(criScores[j].Details[0].indexOf("Match over") !== -1 && this.displayFinal){
-					scorelist[scorelist.length] = 
-					{
-							Summary: criScores[j].Summary, 
-							Type: 2,	
-							Details: criScores[j].Details, 
-							Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
-							Icon: this.icon
-					};
+				if(criScores[j].Details[0].indexOf("Match over") !== -1){					
+					
+					if(this.displayFinal){
+						scorelist[scorelist.length] = 
+						{
+								Summary: criScores[j].Summary, 
+								Type: 2,	
+								Details: criScores[j].Details, 
+								Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
+								Icon: this.icon
+						};
+					}
 				}
-				else if(criScores[j].Details[0].match(/[A-Z][a-z][a-z] \d{1,2}, \d{4}/) !== null && this.displaySchedule){
-					scorelist[scorelist.length] = 
-					{
-							Summary: criScores[j].Summary, 
-							Type: 5,	
-							Details: criScores[j].Details, 
-							Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
-							Icon: this.icon
-					};
+				else if(criScores[j].Details[0].match(/[A-Z][a-z][a-z] \d{1,2}, \d{4}/) !== null){
+					
+					if(this.displaySchedule){
+						scorelist[scorelist.length] = 
+						{
+								Summary: criScores[j].Summary, 
+								Type: 5,	
+								Details: criScores[j].Details, 
+								Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
+								Icon: this.icon
+						};
+					}
 				}
-				else{
+				else{					
 					scorelist[scorelist.length] = 
 					{
 							Summary: criScores[j].Summary, 

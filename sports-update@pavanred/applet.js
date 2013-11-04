@@ -5,15 +5,15 @@
  * 	schedules, cancelled and delayed games
  * 
  *  - Live score updates available for :
- *      - Cricket
+ *      - Cricket (International, IPL, Firstclass, County, Clubs)
  * 		- Football (International, UK, USA and European)
- * 		- Tennis
- * 		- Motorsports
  * 		- Golf
  * 	  	- Basketball (NBA, WNBA, NCAA basketball)
  * 		- American football (NFL)
  * 		- Baseball (MLB)
  *      - Ice hockey (NHL)
+ *      - Tennis	(Updates ceased)
+ * 		- Motorsports 	(Updates ceased)
  *
  *  Author
  *	 Pavan Reddy <pavankumar.kh@gmail.com>

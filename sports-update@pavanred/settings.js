@@ -7,7 +7,7 @@ const Values = {
 	//cricket
 	cricket_international_updates:true,		
 	cricket_india_updates:true,			//Indian Premier League
-	cricket_all_updates:true,			//worldwide international, first class, county, college - men and women
+	cricket_all_updates:false,			//worldwide international, first class, county, college, clubs - men and women
 		
     //football
     football_usa_updates: true,
