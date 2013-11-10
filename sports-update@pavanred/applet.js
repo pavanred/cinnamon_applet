@@ -12,8 +12,8 @@
  * 		- American football (NFL)
  * 		- Baseball (MLB)
  *      - Ice hockey (NHL)
- *      - Tennis	(Updates ceased)
- * 		- Motorsports 	(Updates ceased)
+ *      - Tennis	(Updates discontinued)
+ * 		- Motorsports 	(Updates discontinued)
  *
  *  Author
  *	 Pavan Reddy <pavankumar.kh@gmail.com>

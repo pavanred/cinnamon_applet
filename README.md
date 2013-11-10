@@ -12,8 +12,8 @@ sports-update is a simple applet for <a href="http://cinnamon.linuxmint.com/">Ci
 * Baseball (MLB)
 * Ice hockey (NHL)
 * Golf
-* Motorsports (Updates ceased)
-* Tennis (Updates ceased)
+* Motorsports (Updates discontinued)
+* Tennis (Updates discontinued)
 
 ###Installation
 

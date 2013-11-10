@@ -5,6 +5,8 @@ imports.searchPath.push( imports.ui.appletManager.appletMeta["sports-update@pava
 
 const Soup = imports.gi.Soup;
 const Json = imports.json_parse;
+const GLib = imports.gi.GLib;
+
 const InternationalTeams = new Array("Australia","India","England","Pakistan","South Africa","New Zealand",
 		"Sri Lanka","West Indies","Zimbabwe","Bangladesh","Kenya","Ireland","Canada","Netherlands",
 		"Scotland","Afghanistan","USA");
@@ -93,47 +95,7 @@ LiveScore.prototype.parseResponse = function(response){
 	try {
 		if(this.sport == "cricket_international" || this.sport == "cricket_ipl" || this.sport == "cricket"){
 			
-			var criScores = parseCricketResponse(response, this.sport);
-			
-			for(var j = 0; j < criScores.length; j++){		
-				
-				if(criScores[j].Details[0].indexOf("Match over") !== -1){					
-					
-					if(this.displayFinal){
-						scorelist[scorelist.length] = 
-						{
-								Summary: criScores[j].Summary, 
-								Type: 2,	
-								Details: criScores[j].Details, 
-								Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
-								Icon: this.icon
-						};
-					}
-				}
-				else if(criScores[j].Details[0].match(/[A-Z][a-z][a-z] \d{1,2}, \d{4}/) !== null){
-					
-					if(this.displaySchedule){
-						scorelist[scorelist.length] = 
-						{
-								Summary: criScores[j].Summary, 
-								Type: 5,	
-								Details: criScores[j].Details, 
-								Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
-								Icon: this.icon
-						};
-					}
-				}
-				else{					
-					scorelist[scorelist.length] = 
-					{
-							Summary: criScores[j].Summary, 
-							Type: 1,	
-							Details: criScores[j].Details, 
-							Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + criScores[j].Id + ".html", 	
-							Icon: this.icon
-					};
-				}
-			}
+			this.parseCricketResponse(response, this.sport);			
 		}
 		else{
 			
@@ -168,18 +130,12 @@ LiveScore.prototype.parseResponse = function(response){
 						
 						if(summary.indexOf("FINAL") !== -1 || summary.indexOf("Full-time") !== -1){
 							type = 2;
-							//summary = summary.replace("(FINAL)","");
-							//summary = summary.replace("(Full-time)","");
 						}
 						else if(summary.indexOf("CANCELLED") !== -1){
-							type = 4;
-							//summary = summary.replace("(CANCELLED)","");
-							
+							type = 4;							
 						}
 						else if(summary.indexOf("DELAYED") !== -1 || summary.indexOf("Postponed") !== -1){
 							type = 3;
-							//summary = summary.replace("(Postponed)","");
-							//summary = summary.replace("(DELAYED)","");
 						}
 						else if(summary.indexOf("AM") !== -1 || summary.indexOf("PM") !== -1)
 							type = 5;
@@ -230,7 +186,7 @@ LiveScore.prototype.parseResponse = function(response){
 				}
 				else if((summary.indexOf("AM") !== -1 || summary.indexOf("PM") !== -1) && this.displaySchedule){
 					
-					var tempSum = summary;
+					/*var tempSum = summary;
 					var bracketStart = tempSum.indexOf("(");
 					var bracketEnd = tempSum.indexOf(")");
 					var summarybit = "";
@@ -258,7 +214,7 @@ LiveScore.prototype.parseResponse = function(response){
 					if(PM)
 						hours = hours + 12 - 1;
 														
-					var today = new Date();
+					var today = new GLib.GDateTime();
 					global.log("today" + today.toString() + "-" + today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate() + "-" + hours + "-" + minutes);
 					
 					var et = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes, 0, 0);
@@ -266,10 +222,10 @@ LiveScore.prototype.parseResponse = function(response){
 					var final = new Date(et.toUTCString());
 
 					//summarybit = summarybit + " (" + final.getHours() + ":" + final.getMinutes() + ")";
-					summarybit = summarybit + final.toString();
+					summarybit = summarybit + final.toString();*/
 
 					scorelist[scorelist.length] = 
-						{Summary: summarybit, Type: type, Details: details, Url: url, Icon: this.icon};
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
 				}
 				else if(summary.indexOf("DELAYED") == -1 && summary.indexOf("CANCELLED") == -1 
 					&& summary.indexOf("FINAL") == -1 && summary.indexOf("Full-time") == -1 && summary.indexOf("Postponed") == -1
@@ -289,7 +245,8 @@ LiveScore.prototype.parseResponse = function(response){
 	}	 
 }
 
-function parseCricketResponse(response, sport){
+LiveScore.prototype.parseCricketResponse = function(response, sport){
+	
 	try{		
 		var games = Json.json_parse(response, null);
 
@@ -297,11 +254,11 @@ function parseCricketResponse(response, sport){
 		
 		for(var i=0; i < games.length; i++){
 			
-			if(sport == "cricket_international" && isInternational(games[i].t1,games[i].t2)){
+			if(sport == "cricket_international" && this.isInternational(games[i].t1,games[i].t2)){
 				matchIds[matchIds.length] = games[i].id;
 				continue;
 			}
-			if(sport == "cricket_ipl" && isIPL(games[i].t1,games[i].t2)){
+			if(sport == "cricket_ipl" && this.isIPL(games[i].t1,games[i].t2)){
 				matchIds[matchIds.length] = games[i].id;				
 				continue;
 			}
@@ -310,26 +267,37 @@ function parseCricketResponse(response, sport){
 				continue;
 			}
 		}
-		
-		return getCricketScoreDetails(matchIds);
+
+		if(matchIds.length > 0)
+			this.getCricketScoreDetails(matchIds);
 		
 	}
 	catch (e){
-		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);
-	
+		global.log("sports-update@pavanred : Error parsing cricket updates "  + e);	
 	}	
 }
 
-function getCricketScoreDetails(matchIds){
-	try{		
+LiveScore.prototype.getCricketScoreDetails = function(matchIds){
+	try{	
+		
 		var url = "http://cricscore-api.appspot.com//csa?id=";
 		var scores = [];
 
 		for(var i = 0; i < matchIds.length; i++){
 			
 			var detail = [];
-			
-			var _httpSession = new Soup.SessionSync();			
+
+			let this__ = this;
+			let message__ = Soup.Message.new('GET', url + matchIds[i]);
+						
+			this.httpSession.queue_message(message__, function(session,message){
+				this__.onCricketHandleResponse(session,message)
+				}
+			);			
+		}
+		
+		/* synchronous call
+		  	var _httpSession = new Soup.SessionSync();			
 			var msg = Soup.Message.new('GET',url + matchIds[i]);
 			_httpSession.send_message (msg);			
 			
@@ -338,27 +306,76 @@ function getCricketScoreDetails(matchIds){
 			}
 			
 			var matchDetails = Json.json_parse(msg.response_body.data, null);
-			
-			detail[detail.length] = matchDetails[0].de;
-			
-			scores[scores.length] =   
-			{
-					Summary: matchDetails[0].si, 				
-					Details: detail, 
-					Id: matchDetails[0].id, 	
-			};
-			
-		}
-		
-		return scores;
+		*/	
 	}
 	catch (e){
-		global.log("sports-update@pavanred : Error fetching cricket updates "  + e);
-		return [];
+		global.log("sports-update@pavanred : Error fetching cricket updates "  + e);		
 	}	
 }
 
-function isInternational(team1,team2){
+LiveScore.prototype.onCricketHandleResponse = function(session,message){
+	
+	var detail = [];
+	var score = null;
+	var scorelist = [];
+	var index = 0;
+	
+	try{	
+	
+		if (message.status_code !== 200) {
+			this.callbacks.onError(message.status_code);
+			return;
+		}
+		
+		var matchDetails = Json.json_parse(message.response_body.data, null);		
+		detail[detail.length] = matchDetails[0].de;
+		
+		index = scorelist.length;
+		
+		scorelist[index] = 
+		{
+			Summary: matchDetails[0].si, 
+			Type: null,	
+			Details: detail, 
+			Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + matchDetails[0].id + ".html", 	
+			Icon: this.icon
+		};
+		
+		var isFinal = false;
+		var isSchedule = false;
+		
+		if(detail[0].indexOf("Match over") !== -1 || detail[0].indexOf("Stumps") !== -1)
+			isFinal = true;
+		
+		if(detail[0].match(/[A-Z][a-z][a-z] \d{1,2}, \d{4}/) !== null)
+			isSchedule = true;
+		
+		//get type of the score update - final / schedule / live
+				
+		if(isFinal == true && this.displayFinal)
+			scorelist[index].Type = 2;	
+		else if(isSchedule == true && this.displaySchedule)
+			scorelist[index].Type = 5;
+		else
+			scorelist[index].Type = 1;		
+	}
+	catch (e){
+		global.log("sports-update@pavanred : Error parsing cricket scores "  + e);		
+	}
+	
+	try {
+		if (this.callbacks.onScoreUpdate != undefined){		
+			this.callbacks.onScoreUpdate(scorelist);
+		}else{
+			global.log("sports-update@pavanred : exception onScoreUpdate callback NOT FOUND!");
+		}
+	} catch (e){
+		global.log("sports-update@pavanred : exception triggering score update "  + e);
+	}
+}
+
+LiveScore.prototype.isInternational = function(team1,team2){	
+	
 	var international = false;
 	try{	
 		for(var i = 0; i < InternationalTeams.length; i++){
@@ -377,7 +394,7 @@ function isInternational(team1,team2){
 	}	
 }
 
-function isIPL(team1,team2){
+LiveScore.prototype.isIPL = function(team1,team2){
 	try{	
 		var ipl = false;
 		for(var i = 0; i < ipl.length; i++){
