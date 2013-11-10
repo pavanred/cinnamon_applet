@@ -52,6 +52,6 @@ const Values = {
 										   (till the scores are available in the input stream)
 										   e.g Dallas 103  Washington 94 (FINAL)									*/
 										
-	display_upcoming_schedules: true,  // Display the schedule of upcoming games
+	display_upcoming_schedules: false,  // Display the schedule of upcoming games
 	
 };
