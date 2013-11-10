@@ -186,7 +186,7 @@ LiveScore.prototype.parseResponse = function(response){
 				}
 				else if((summary.indexOf("AM") !== -1 || summary.indexOf("PM") !== -1) && this.displaySchedule){
 					
-					var tempSum = summary;
+					/*var tempSum = summary;
 					var bracketStart = tempSum.indexOf("(");
 					var bracketEnd = tempSum.indexOf(")");
 					var summarybit = "";
@@ -214,7 +214,7 @@ LiveScore.prototype.parseResponse = function(response){
 					if(PM)
 						hours = hours + 12 - 1;
 														
-					var today = new GDateTime();
+					var today = new GLib.GDateTime();
 					global.log("today" + today.toString() + "-" + today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate() + "-" + hours + "-" + minutes);
 					
 					var et = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes, 0, 0);
@@ -222,10 +222,10 @@ LiveScore.prototype.parseResponse = function(response){
 					var final = new Date(et.toUTCString());
 
 					//summarybit = summarybit + " (" + final.getHours() + ":" + final.getMinutes() + ")";
-					summarybit = summarybit + final.toString();
+					summarybit = summarybit + final.toString();*/
 
 					scorelist[scorelist.length] = 
-						{Summary: summarybit, Type: type, Details: details, Url: url, Icon: this.icon};
+						{Summary: summary, Type: type, Details: details, Url: url, Icon: this.icon};
 				}
 				else if(summary.indexOf("DELAYED") == -1 && summary.indexOf("CANCELLED") == -1 
 					&& summary.indexOf("FINAL") == -1 && summary.indexOf("Full-time") == -1 && summary.indexOf("Postponed") == -1
