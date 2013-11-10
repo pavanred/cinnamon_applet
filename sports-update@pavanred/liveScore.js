@@ -5,6 +5,8 @@ imports.searchPath.push( imports.ui.appletManager.appletMeta["sports-update@pava
 
 const Soup = imports.gi.Soup;
 const Json = imports.json_parse;
+const GLib = imports.gi.GLib;
+
 const InternationalTeams = new Array("Australia","India","England","Pakistan","South Africa","New Zealand",
 		"Sri Lanka","West Indies","Zimbabwe","Bangladesh","Kenya","Ireland","Canada","Netherlands",
 		"Scotland","Afghanistan","USA");
@@ -212,8 +214,8 @@ LiveScore.prototype.parseResponse = function(response){
 					if(PM)
 						hours = hours + 12 - 1;
 														
-					var today = new Date();
-					//global.log("today" + today.toString() + "-" + today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate() + "-" + hours + "-" + minutes);
+					var today = new GDateTime();
+					global.log("today" + today.toString() + "-" + today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate() + "-" + hours + "-" + minutes);
 					
 					var et = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes, 0, 0);
 
@@ -333,28 +335,29 @@ LiveScore.prototype.onCricketHandleResponse = function(session,message){
 		scorelist[index] = 
 		{
 			Summary: matchDetails[0].si, 
-			Type: 0,	
+			Type: null,	
 			Details: detail, 
 			Url: "http://www.espncricinfo.com/dummy/engine/current/match/" + matchDetails[0].id + ".html", 	
 			Icon: this.icon
 		};
-
-		if(detail[0].indexOf("Match over") !== -1 || detail[0].indexOf("Stumps") !== -1){				
-
-			if(this.displayFinal){
-				scorelist[index].Type = 2;	
-			}
-		}
-		else if(detail[0].match(/[A-Z][a-z][a-z] \d{1,2}, \d{4}/) !== null){
-
-			if(this.displaySchedule){
-				scorelist[index].Type = 5;	
-			}
-		}
-		else{	
+		
+		var isFinal = false;
+		var isSchedule = false;
+		
+		if(detail[0].indexOf("Match over") !== -1 || detail[0].indexOf("Stumps") !== -1)
+			isFinal = true;
+		
+		if(detail[0].match(/[A-Z][a-z][a-z] \d{1,2}, \d{4}/) !== null)
+			isSchedule = true;
+		
+		//get type of the score update - final / schedule / live
+				
+		if(isFinal == true && this.displayFinal)
+			scorelist[index].Type = 2;	
+		else if(isSchedule == true && this.displaySchedule)
+			scorelist[index].Type = 5;
+		else
 			scorelist[index].Type = 1;		
-		}
-	
 	}
 	catch (e){
 		global.log("sports-update@pavanred : Error parsing cricket scores "  + e);		
