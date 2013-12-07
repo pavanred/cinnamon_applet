@@ -2,6 +2,6 @@
 applet.js
 liveScore.js
 metadata.json
-settings.js
+settings.js (deprecated)
 json_parse.js
 settings-schema.json
