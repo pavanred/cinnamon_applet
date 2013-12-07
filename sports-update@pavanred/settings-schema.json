@@ -8,13 +8,13 @@
   	{ 
   		"type": "checkbox", 
    	 	"default": true,
-    	"description": "International"
+    	"description": "International Cricket"
   	},
   	"cricket_india_updates":
   	{ 
   		"type": "checkbox", 
    	 	"default": true,
-    	"description": "Indian Premier League"
+    	"description": "IPL - Indian Premier League"
   	},
   	"cricket_all_updates":
   	{ 
