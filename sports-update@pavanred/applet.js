@@ -164,7 +164,7 @@ sports_update.prototype = {
 				this.settings.bindProperty(Settings.BindingDirection.IN, key, keyProp, null, null)
 			}
 			
-			this._refresh_interval = this._refresh_interval * 60; //convert to seconds
+			this._refresh_interval = parseInt(this._refresh_interval) * 60; //convert to seconds
 
 			var sports = [];
 			this.responseCount = 0;
@@ -253,8 +253,8 @@ sports_update.prototype = {
                 this._applet_context_menu.addMenuItem(this.settingsMenu);
                 
                 //refresh menu
-                this.refreshMenu = new Applet.MenuItem(_(REFRESH), Gtk.STOCK_REFRESH ,Lang.bind(this,this._refresh));
-                this._applet_context_menu.addMenuItem(this.refreshMenu);
+                //this.refreshMenu = new Applet.MenuItem(_(REFRESH), Gtk.STOCK_REFRESH ,Lang.bind(this,this._refresh));
+                //this._applet_context_menu.addMenuItem(this.refreshMenu);
 				
 				this.sports = sports;
 				this.orientation = orientation;

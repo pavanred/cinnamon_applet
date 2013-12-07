@@ -25,7 +25,7 @@ Live score updates for sports are displayed on clicking on the applet. The setti
 
 ###Testing
 
-This script was tested on Cinnamon 1.8.8 on Linux Mint 15 
+This script was tested on Cinnamon 2.0.14 on Linux Mint 16 
 
 ###Mailing list
 
