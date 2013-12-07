@@ -54,6 +54,7 @@ const Util = imports.misc.util;
 const GLib = imports.gi.GLib;
 const Mainloop = imports.mainloop;
 const Gtk = imports.gi.Gtk;
+const Settings = imports.ui.settings;
 
 const LiveScore = imports.liveScore;
 const conf_script = GLib.build_filenamev([global.userdatadir, 'applets/sports-update@pavanred/settings.js']);
@@ -69,6 +70,54 @@ const SETTINGS = "Settings";
 const REFRESH = "Refresh";
 const LIVE = "LIVE";
 const REFRESH_ERROR = "Unable to refresh scores";
+const CMD_SETTINGS = "cinnamon-settings applets " + UUID;
+
+//settings keys
+const CRIC_INTL_KEY = "cricket_international_updates";
+const CRIC_IPL_KEY = "cricket_india_updates";
+const CRIC_ALL_KEY = "cricket_all_updates";
+
+const FB_INTL_KEY = "football_international_updates";
+const FB_EUR_KEY = "football_europe_updates";
+const FB_UK_KEY = "football_uk_updates";
+const FB_USA_KEY = "football_usa_updates";
+
+const BB_NBA_KEY = "basketball_updates";
+const BB_WNBA_KEY = "women_basketball_updates";
+const BB_NCAA_KEY = "ncaa_basketball_updates";
+
+const AF_KEY = "americanfootball_updates";
+const IH_KEY = "icehockey_updates";
+const B_KEY = "baseball_updates";
+const G_KEY = "golf_updates";
+
+const CANCELLED_KEY = "display_cancelled";
+const DELAYED_KEY = "display_delayed";
+const FINAL_KEY = "display_finalscores";
+const SCHEDULE_KEY = "display_upcoming_schedules";
+const REFRESH_INTERVAL_KEY = "refresh_interval";
+
+const KEYS = [
+  CRIC_INTL_KEY,
+  CRIC_IPL_KEY,
+  CRIC_ALL_KEY,
+  FB_INTL_KEY,
+  FB_EUR_KEY,
+  FB_UK_KEY,
+  FB_USA_KEY,
+  BB_NBA_KEY,
+  BB_WNBA_KEY,
+  BB_NCAA_KEY,
+  AF_KEY,
+  IH_KEY,
+  B_KEY,
+  G_KEY,
+  CANCELLED_KEY,
+  DELAYED_KEY,
+  FINAL_KEY,
+  SCHEDULE_KEY,
+  REFRESH_INTERVAL_KEY
+]
 
 //icons
 const FOOTBALL_ICON = "/images/icon-football.png";
@@ -98,87 +147,96 @@ const TENNIS_APIROOT = "http://sports.espn.go.com/sports/tennis/bottomline/score
 const MOTOR_APIROOT = "http://sports.espn.go.com/rpm/bottomline/race";
 const CRICKET_APIROOT = "http://cricscore-api.appspot.com/csa";
 
-function MyApplet(orientation) {
-	this._init(orientation);
+function sports_update(metadata, orientation, panelHeight, instanceId) {
+	this.settings = new Settings.AppletSettings(this, UUID, instanceId)
+	this._init(orientation, panelHeight, instanceId);
 }
 
-MyApplet.prototype = {
+sports_update.prototype = {
 		__proto__: Applet.TextIconApplet.prototype,
 
-		_init: function(orientation) {
-			Applet.TextIconApplet.prototype._init.call(this, orientation);
+		_init: function(orientation, panelHeight, instanceId) {
+			Applet.TextIconApplet.prototype._init.call(this, orientation, panelHeight, instanceId);
+
+			for (let k in KEYS) {
+				let key = KEYS[k]
+				let keyProp = "_" + key
+				this.settings.bindProperty(Settings.BindingDirection.IN, key, keyProp, null, null)
+			}
+			
+			this._refresh_interval = this._refresh_interval * 60; //convert to seconds
 
 			var sports = [];
 			this.responseCount = 0;
 			
 			try {
 					
-				if(AppSettings.basketball_updates){
+				if(this._basketball_updates){
 					var sportItem = {Apiroot: NBA_APIROOT, Icon: BASKETBALL_ICON, Sport: "basketball"};
 					sports[sports.length] = sportItem;
 				}
-				if(AppSettings.americanfootball_updates){
+				if(this._americanfootball_updates){
 					var sportItem = {Apiroot: NFL_APIROOT, Icon: AFOOTBALL_ICON, Sport: "a_football"};
 					sports[sports.length] = sportItem;
 				}	
-				if(AppSettings.baseball_updates){
+				if(this._baseball_updates){
 					var sportItem = {Apiroot: MLB_APIROOT, Icon: BASEBALL_ICON, Sport: "baseball"};
 					sports[sports.length] = sportItem;
 				}
-				if(AppSettings.icehockey_updates){		
+				if(this._icehockey_updates){		
 					var sportItem = {Apiroot: NHL_APIROOT, Icon: ICEHOCKEY_ICON, Sport: "icehockey"};
 					sports[sports.length] = sportItem;
 				}
-				if(AppSettings.women_basketball_updates){
+				if(this._women_basketball_updates){
 					var sportItem = {Apiroot: WNBA_APIROOT, Icon: BASKETBALL_ICON, Sport: "basketball"};
 					sports[sports.length] = sportItem;
 				}	
-				if(AppSettings.NCAA_basketball){
+				if(this._ncaa_basketball){
 					var sportItem = {Apiroot: NCAA_APIROOT, Icon: BASKETBALL_ICON, Sport: "basketball"};
 					sports[sports.length] = sportItem;			
 				}
-				if(AppSettings.football_europe_updates){		
+				if(this._football_europe_updates){		
 					var sportItem = {Apiroot: FB_EUR_APIROOT, Icon: FOOTBALL_ICON, Sport: "football"};
 					sports[sports.length] = sportItem;		
 				}
-				if(AppSettings.football_international_updates){		
+				if(this._football_international_updates){		
 					var sportItem = {Apiroot: FB_INT_APIROOT, Icon: FOOTBALL_ICON, Sport: "football"};
 					sports[sports.length] = sportItem;
 				}
-				if(AppSettings.football_uk_updates){
+				if(this._football_uk_updates){
 					var sportItem = {Apiroot: FB_UK_APIROOT, Icon: FOOTBALL_ICON, Sport: "football"};
 					sports[sports.length] = sportItem;	
 				}
-				if(AppSettings.football_usa_updates){
+				if(this._football_usa_updates){
 					var sportItem = {Apiroot: FB_US_APIROOT, Icon: FOOTBALL_ICON, Sport: "football"};
 					sports[sports.length] = sportItem;		
 				}
-				if(AppSettings.golf_updates){
+				if(this._golf_updates){
 					var sportItem = {Apiroot: GOLF_APIROOT, Icon: GOLF_ICON, Sport: "golf"};
 					sports[sports.length] = sportItem;	
 				}
-				if(AppSettings.motorsports_updates){
+				/*if(this._motorsports_updates){
 					var sportItem = {Apiroot: MOTOR_APIROOT, Icon: MOTORSPORT_ICON, Sport: "motorsports"};
 					sports[sports.length] = sportItem;	
 				}
-				if(AppSettings.tennis_updates){
+				if(this._tennis_updates){
 					var sportItem = {Apiroot: TENNIS_APIROOT, Icon: TENNIS_ICON, Sport: "tennis"};
 					sports[sports.length] = sportItem;	
-				}				
-				if(AppSettings.cricket_international_updates){
+				}*/
+				if(this._cricket_international_updates){
 					var sportItem = {Apiroot: CRICKET_APIROOT, Icon: CRICKET_ICON, Sport: "cricket_international"};
 					sports[sports.length] = sportItem;	
 				}
-				if(AppSettings.cricket_india_updates){
+				if(this._cricket_india_updates){
 					var sportItem = {Apiroot: CRICKET_APIROOT, Icon: CRICKET_ICON, Sport: "cricket_ipl"};
 					sports[sports.length] = sportItem;	
 				}
-				if(AppSettings.cricket_all_updates){
+				if(this._cricket_all_updates){
 					var sportItem = {Apiroot: CRICKET_APIROOT, Icon: CRICKET_ICON, Sport: "cricket"};
 					sports[sports.length] = sportItem;	
 				}
 					
-				this.refreshInterval = parseInt(AppSettings.refresh_interval);
+				this.refreshInterval = parseInt(this._refresh_interval);
 	
 				//set panel icon and tool tip
 				this.set_applet_tooltip(PANEL_TOOL_TIP);	
@@ -256,7 +314,7 @@ MyApplet.prototype = {
 				let sports = this.sports;
 				let orientation = this.orientation;
 				
-				this.refreshInterval = parseInt(AppSettings.refresh_interval);
+				this.refreshInterval = parseInt(this._refresh_interval);
 				
 				//flag sports list beginning and end to clear/remove items on menu refresh
 				if(sports.length > 0){
@@ -275,10 +333,10 @@ MyApplet.prototype = {
 						'apiRoot': sports[i].Apiroot,
 						'icon': sports[i].Icon,
 						'sport': sports[i].Sport,
-						'displayCancelled': AppSettings.display_cancelled,
-						'displayDelayed': AppSettings.display_delayed,
-						'displayFinal': AppSettings.display_finalscores,
-						'displaySchedule': AppSettings.display_upcoming_schedules,
+						'displayCancelled': this._display_cancelled,
+						'displayDelayed': this._display_delayed,
+						'displayFinal': this._display_finalscores,
+						'displaySchedule': this._display_upcoming_schedules,
 						'callbacks':{
 							'onError':function(status_code){_this._onLiveScoreError(status_code)},
 							'onScoreUpdate':function(response){_this._onScoreUpdate(response);}
@@ -304,7 +362,9 @@ MyApplet.prototype = {
 		
 		_settings: function(){
 			//Open settings file
-			Main.Util.spawnCommandLine("xdg-open " + conf_script);
+			//Main.Util.spawnCommandLine("xdg-open " + conf_script);
+			Util.spawnCommandLine(CMD_SETTINGS);
+            this.close();
 		}, 
 		
 		_refresh: function(){
@@ -466,8 +526,8 @@ MyPopupMenuItem.prototype = {
 /*------------------------
  * Main
  * ------------------------*/
-function main(metadata, orientation) {
-	let myApplet = new MyApplet(orientation);
+function main(metadata, orientation, panelHeight, instanceId) {
+	let myApplet = new sports_update(metadata, orientation, panelHeight, instanceId);
 	return myApplet;
 };
 
