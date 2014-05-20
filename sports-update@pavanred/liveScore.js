@@ -10,8 +10,8 @@ const GLib = imports.gi.GLib;
 const InternationalTeams = new Array("Australia","India","England","Pakistan","South Africa","New Zealand",
 		"Sri Lanka","West Indies","Zimbabwe","Bangladesh","Kenya","Ireland","Canada","Netherlands",
 		"Scotland","Afghanistan","USA");
-const IPLTeams = new Array("Chennai Super Kings","Delhi Daredevils","Kings XI Punjab","Kolkata Knight Riders",
-		"Mumbai Indians","Rajasthan Royals","Royal Challengers Bangalore","Sunrisers Hyderabad");
+const IPLTeams = new Array("Chennai T","Delhi T","Punjab T","Kolkata T",
+		"Mumbai T","Rajasthan T","Bangalore T","Hyderabad T");
 
 function LiveScore(a_params){
 
@@ -397,9 +397,9 @@ LiveScore.prototype.isInternational = function(team1,team2){
 LiveScore.prototype.isIPL = function(team1,team2){
 	try{	
 		var ipl = false;
-		for(var i = 0; i < ipl.length; i++){
+		for(var i = 0; i < IPLTeams.length; i++){
 				
-			if(team1 == ipl[i] || team2 == ipl[i]){
+			if(team1 == IPLTeams[i] || team2 == IPLTeams[i]){
 				ipl = true;
 				break;
 			}
